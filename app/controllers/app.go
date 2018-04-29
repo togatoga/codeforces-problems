@@ -8,6 +8,6 @@ type App struct {
 	*revel.Controller
 }
 
-func (c App) Index() revel.Result {
+func (c App) Index(user, rivals string) revel.Result {
 	return c.Render()
 }
