@@ -9,22 +9,25 @@ type Api struct {
 }
 
 func (c Api) Submission(handle string) revel.Result {
+	data := make(map[string]interface{})
 	c.Validation.Required(handle)
 	if c.Validation.HasErrors() {
-
+		c.Response.SetStatus(400)
+		data["erro"] = "Error"
+		return c.RenderJSON(data)
 	}
-	data := make(map[string]interface{})
 
 	return c.RenderJSON(data)
 }
 
 func (c Api) User(handle string) revel.Result {
+	data := make(map[string]interface{})
 	c.Validation.Required(handle)
 	if c.Validation.HasErrors() {
 		c.Response.SetStatus(400)
+		data["error"] = "Error"
+		return c.RenderJSON(data)
 	}
-
-	data := make(map[string]interface{})
 	c.Response.SetStatus(200)
 	return c.RenderJSON(data)
 }
