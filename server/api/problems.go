@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo"
 )
 
@@ -16,5 +18,8 @@ type Problem struct {
 }
 
 func Problems(c echo.Context) (err error) {
-	// return c.JSON(http.StatusOK, u)
+	p := new(Problem)
+	p.ContestID = 11514
+	p.Name = "togatoga"
+	return c.JSON(http.StatusOK, p)
 }
