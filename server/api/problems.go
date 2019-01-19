@@ -1,25 +1,20 @@
 package api
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo"
+	"github.com/togatoga/goforces"
 )
 
-//Problem represents a struct for codeforces problem
-type Problem struct {
-	ContestID      int      `json:"contestId"`
-	ProblemsetName string   `json:"problemsetName"`
-	Index          string   `json:"index"`
-	Name           string   `json:"name"`
-	Type           string   `json:"name"`
-	Points         string   `json:"points"`
-	Tags           []string `json:"tags"`
-}
-
 func Problems(c echo.Context) (err error) {
-	p := new(Problem)
-	p.ContestID = 11514
-	p.Name = "togatoga"
-	return c.JSON(http.StatusOK, p)
+
+	logger := log.New(os.Stderr, "*** ", log.LstdFlags)
+	cli, _ := goforces.NewClient(logger)
+	ctx := context.Background()
+	problems, _ := cli.GetProblemSetProblems(ctx, nil)
+	return c.JSON(http.StatusOK, problems)
 }
