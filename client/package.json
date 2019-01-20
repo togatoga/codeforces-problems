@@ -1,0 +1,11 @@
+{
+  "name": "codeforces-problems",
+  "version": "1.0.0",
+  "description": "The manegement web site for codeforces problems",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "togatoga",
+  "license": "MIT"
+}
