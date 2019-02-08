@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { fetchProblems } from "../actions/actions";
-
+import Problems from "../components/Problems";
 import { connect } from "react-redux";
 
 class AsyncApp extends Component {
@@ -11,18 +11,18 @@ class AsyncApp extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch(fetchProblems());
-    console.log(this.props.problemsByApi);
   }
   render() {
-    return <div>Hello World!!</div>;
+    return <Problems problems={this.props.problems} />;
   }
 }
 
 function mapStateToProps(state) {
   const { problemsByApi } = state;
+  const { problems } = problemsByApi;
 
   return {
-    problemsByApi
+    problems
   };
 }
 

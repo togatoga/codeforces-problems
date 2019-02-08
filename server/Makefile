@@ -11,3 +11,5 @@ build:
 clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
+test:
+	$(GOTEST)

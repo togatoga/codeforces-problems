@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
-import { REQUEST_PROBLEMS, RECEIVE_PROBLEMS } from "../actions/actions";
+import { RECEIVE_PROBLEMS } from "../actions/actions";
 
-function problemsByApi(state = {}, action) {
+function problemsByApi(state = { problems: [] }, action) {
   switch (action.type) {
     case RECEIVE_PROBLEMS:
       return Object.assign({}, state, {

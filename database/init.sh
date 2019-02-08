@@ -1,4 +1,5 @@
 #!/bin/bash
-createdb -E utf8 codeforces-problems
+dropdb codeforces_problems -U postgres -W
+createdb -E utf8 codeforces_problems -U postgres -W
 # table
-psql codeforces-problems -f codeforces-problems.sql
+psql -U postgres -W -d codeforces_problems -f codeforces_problems.sql

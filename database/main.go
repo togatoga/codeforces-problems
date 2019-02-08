@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/togatoga/goforces"
 
@@ -17,7 +18,7 @@ var api *goforces.Client
 
 func init() {
 	var err error
-	connStr := "dbname=codeforces-problems sslmode=disable"
+	connStr := "user=postgres password=postgres dbname=codeforces_problems sslmode=disable"
 
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -27,7 +28,6 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func GetProblems() {
@@ -36,6 +36,12 @@ func GetProblems() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	sort.Slice(problems.Problems, func(i, j int) bool {
+		if problems.Problems[i].ContestID != problems.Problems[j].ContestID {
+			return problems.Problems[i].ContestID < problems.Problems[i].ContestID
+		}
+		return problems.Problems[i].Index < problems.Problems[j].Index
+	})
 	for _, problem := range problems.Problems {
 		//INSERT
 		var id int

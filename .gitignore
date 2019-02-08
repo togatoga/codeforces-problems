@@ -2,5 +2,6 @@ test-results/
 tmp/
 routes/
 server/server
+database/database
 client/node_modules/
 client/dist/

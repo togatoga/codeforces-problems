@@ -11,8 +11,8 @@ type API struct {
 }
 
 //NewAPI returns an API pointer to communicate with the database
-func NewAPI(userName, dbName string) (*API, error) {
-	connStr := fmt.Sprintf("user=%s dbname=%s sslmode=disable", userName, dbName)
+func NewAPI(username, password, dbName string) (*API, error) {
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", username, password, dbName)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err

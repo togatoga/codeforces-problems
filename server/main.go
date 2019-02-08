@@ -16,7 +16,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	innerAPI, err := api.NewAPI("hitoshi", "codeforces-problems")
+	innerAPI, err := api.NewAPI("postgres", "postgres", "codeforces_problems")
 	defer innerAPI.Db.Close()
 	if err != nil {
 		log.Fatal(err)
