@@ -1,15 +1,7 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from 'react'
 import {
-    Provider
-} from "react-redux";
-import {
-    createStore
-} from 'redux';
-import App from './components/App'
+    render
+} from 'react-dom'
+import Root from "./containers/Root";
 
-
-ReactDOM.render(
-    <App />,
-    document.getElementById("root")
-);
+render(<Root />, document.getElementById('root'))

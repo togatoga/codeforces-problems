@@ -18,6 +18,10 @@ type Problem struct {
 	Tags      []string `json:"tags"`
 }
 
+type Problems struct {
+	Problems []*Problem `json:"problems"`
+}
+
 //Problems returns all problems json data
 func (a *API) Problems(c echo.Context) (err error) {
 	rows, err := a.Db.Query("SELECT id, contest_id, name, index, points, tags FROM problem")
@@ -25,14 +29,14 @@ func (a *API) Problems(c echo.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	problems := []*Problem{}
+	var problems Problems
 	for rows.Next() {
 		problem := new(Problem)
 		err := rows.Scan(&problem.ID, &problem.ContestID, &problem.Name, &problem.Index, &problem.Points, pq.Array(&problem.Tags))
 		if err != nil {
 			return err
 		}
-		problems = append(problems, problem)
+		problems.Problems = append(problems.Problems, problem)
 	}
 	return c.JSON(http.StatusOK, problems)
 }
