@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { fetchProblems } from "../actions/actions";
-import Problems from "../components/Problems";
+import ProblemList from "../components/ProblemList";
 import { connect } from "react-redux";
 import Container from "react-bootstrap/Container";
 
@@ -17,7 +17,7 @@ class AsyncApp extends Component {
     const { problems } = this.props;
     return (
       <Container>
-        {problems.length > 0 && <Problems problems={problems} />}
+        {problems.length > 0 && <ProblemList problems={problems} />}
       </Container>
     );
   }

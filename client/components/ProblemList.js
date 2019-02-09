@@ -2,7 +2,7 @@ import React from "react";
 import { Container, Row, Badge } from "react-bootstrap";
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 
-export default class Problems extends React.Component {
+export default class ProblemList extends React.Component {
   tagsFormatter(data) {
     const tags = data.map((tag, idx) => (
       <Badge key={idx} variant="success">
