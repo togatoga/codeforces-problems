@@ -1,8 +1,18 @@
 import React from "react";
-import { Container, Row, Badge } from "react-bootstrap";
+import { Container, Row, Badge, Table } from "react-bootstrap";
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 
 export default class ProblemList extends React.Component {
+  nameFormatter(name, row) {
+    const { contest_id, index } = row;
+    const url = `http://codeforces.com/problemset/problem/${contest_id}/${index}`;
+
+    return (
+      <a href={url} target="_blank">
+        {name}
+      </a>
+    );
+  }
   tagsFormatter(data) {
     const tags = data.map((tag, idx) => (
       <Badge key={idx} variant="success">
@@ -18,7 +28,8 @@ export default class ProblemList extends React.Component {
       <Container>
         <Row>
           <BootstrapTable data={problems} striped={true} hover={true}>
-            <TableHeaderColumn dataField="name" isKey={true}>
+            <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
+            <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
               Problem
             </TableHeaderColumn>
 
