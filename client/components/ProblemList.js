@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row, Badge, Table } from "react-bootstrap";
+import { Badge } from "react-bootstrap";
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 
 export default class ProblemList extends React.Component {
@@ -25,21 +25,17 @@ export default class ProblemList extends React.Component {
   render() {
     const { problems } = this.props;
     return (
-      <Container>
-        <Row>
-          <BootstrapTable data={problems} striped={true} hover={true}>
-            <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
-            <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
-              Problem
-            </TableHeaderColumn>
+      <BootstrapTable data={problems} striped={true} hover={true}>
+        <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
+        <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
+          Problem
+        </TableHeaderColumn>
 
-            <TableHeaderColumn dataField="points">Points</TableHeaderColumn>
-            <TableHeaderColumn dataField="tags" dataFormat={this.tagsFormatter}>
-              Tags
-            </TableHeaderColumn>
-          </BootstrapTable>
-        </Row>
-      </Container>
+        <TableHeaderColumn dataField="points">Points</TableHeaderColumn>
+        <TableHeaderColumn dataField="tags" dataFormat={this.tagsFormatter}>
+          Tags
+        </TableHeaderColumn>
+      </BootstrapTable>
     );
   }
 }
