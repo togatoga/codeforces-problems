@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { fetchProblems } from "../actions/actions";
 import Problems from "../components/Problems";
 import { connect } from "react-redux";
+import Container from "react-bootstrap/Container";
 
 class AsyncApp extends Component {
   constructor(props) {
@@ -13,7 +14,12 @@ class AsyncApp extends Component {
     dispatch(fetchProblems());
   }
   render() {
-    return <Problems problems={this.props.problems} />;
+    const { problems } = this.props;
+    return (
+      <Container>
+        {problems.length > 0 && <Problems problems={problems} />}
+      </Container>
+    );
   }
 }
 
