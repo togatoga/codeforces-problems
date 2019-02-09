@@ -11,5 +11,7 @@ build:
 clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
+run:
+	./server
 test:
 	$(GOTEST)

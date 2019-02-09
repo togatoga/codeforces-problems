@@ -16,12 +16,16 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	innerAPI, err := api.NewAPI("postgres", "postgres", "codeforces_problems")
-	defer innerAPI.Db.Close()
+	db, err := api.NewAPI("postgres", "postgres", "codeforces_problems")
+	defer db.Db.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	//innerAPI
-	e.GET("/v1/problems", innerAPI.Problems)
+	//db
+	e.GET("/v1/problems", db.Problems)
+	e.GET("/v1/submissions", db.Submissions)
+
+	//API
+
 	e.Logger.Fatal(e.Start(":1323"))
 }

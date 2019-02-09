@@ -9,7 +9,15 @@ export default class ProblemList extends React.Component {
 
     return (
       <a href={url} target="_blank">
-        {name}
+        {index}. {name}
+      </a>
+    );
+  }
+  contestFormatter(contest_id) {
+    const url = `http://codeforces.com/contest/${contest_id}`;
+    return (
+      <a href={url} target="_blank">
+        {contest_id}
       </a>
     );
   }
@@ -19,7 +27,6 @@ export default class ProblemList extends React.Component {
         {tag}
       </Badge>
     ));
-
     return <span>{tags}</span>;
   }
   render() {
@@ -27,11 +34,24 @@ export default class ProblemList extends React.Component {
     return (
       <BootstrapTable data={problems} striped={true} hover={true}>
         <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
+
         <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
           Problem
         </TableHeaderColumn>
-
-        <TableHeaderColumn dataField="points">Points</TableHeaderColumn>
+        <TableHeaderColumn
+          dataField="contest_id"
+          dataFormat={this.contestFormatter}
+          width="10%"
+          dataSort={true}
+        >
+          Contest ID
+        </TableHeaderColumn>
+        <TableHeaderColumn dataField="points" width="10%" dataSort={true}>
+          Points
+        </TableHeaderColumn>
+        <TableHeaderColumn dataField="solved_count" width="10%" dataSort={true}>
+          Solved
+        </TableHeaderColumn>
         <TableHeaderColumn dataField="tags" dataFormat={this.tagsFormatter}>
           Tags
         </TableHeaderColumn>

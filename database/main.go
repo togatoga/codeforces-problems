@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strconv"
+	"time"
 
 	"github.com/togatoga/goforces"
 
@@ -30,7 +32,7 @@ func init() {
 	}
 }
 
-func GetProblems() {
+func GetAllProblems() {
 	ctx := context.Background()
 	problems, err := api.GetProblemSetProblems(ctx, nil)
 	if err != nil {
@@ -42,13 +44,29 @@ func GetProblems() {
 		}
 		return problems.Problems[i].Index < problems.Problems[j].Index
 	})
+
+	mapToSolvedCnt := map[string]int{}
+	for _, statistics := range problems.ProblemStatistics {
+		contestID := statistics.ContestID
+		index := statistics.Index
+		solvedCnt := statistics.SolvedCount
+		mapToSolvedCnt[strconv.Itoa(contestID)+"_"+index] = solvedCnt
+	}
+
 	for _, problem := range problems.Problems {
 		//INSERT
 		var id int
-		err := db.QueryRow("INSERT INTO problem(contest_id, name, index, points, tags) VALUES($1, $2, $3, $4, $5) RETURNING id", problem.ContestID, problem.Name, problem.Index, problem.Points, pq.Array(problem.Tags)).Scan(&id)
+		contestID := problem.ContestID
+		index := problem.Index
+		name := problem.Name
+		points := problem.Points
+		tags := problem.Tags
+		solvedCnt := mapToSolvedCnt[strconv.Itoa(contestID)+"_"+index]
+		updateDate := time.Now()
+		err := db.QueryRow("INSERT INTO problem(contest_id, name, index, points, tags, solved_count, update_date) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id", contestID, name, index, points, pq.Array(tags), solvedCnt, updateDate).Scan(&id)
 		fmt.Println(id, err)
 	}
 }
 func main() {
-	GetProblems()
+	GetAllProblems()
 }

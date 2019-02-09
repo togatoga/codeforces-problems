@@ -35,7 +35,7 @@ function requestUsers(user, rivals) {
   };
 }
 
-function receiveUsers(json) {
+function receiveUsers(user, rivals) {
   return {
     type: RECEIVE_USERS,
     user: json.users,
