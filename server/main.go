@@ -21,11 +21,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	//db
+	//from db
 	e.GET("/v1/problems", db.Problems)
 	e.GET("/v1/submissions", db.Submissions)
-
-	//API
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
