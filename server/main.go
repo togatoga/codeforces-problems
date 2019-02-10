@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	_ "github.com/lib/pq"
-	"github.com/togatoga/codeforces-problems/server/api"
+	"github.com/togatoga/codeforces-problems/server/db"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	db, err := api.NewAPI("postgres", "postgres", "codeforces_problems")
+	db, err := db.NewDB("postgres", "postgres", "codeforces_problems")
 	defer db.Db.Close()
 	if err != nil {
 		log.Fatal(err)

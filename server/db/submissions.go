@@ -1,4 +1,4 @@
-package api
+package db
 
 import (
 	"fmt"
@@ -34,14 +34,14 @@ func parseUsers(users string) []string {
 }
 
 //Submissions returns json data for user submissions from db
-func (a *API) Submissions(c echo.Context) (err error) {
+func (d *DB) Submissions(c echo.Context) (err error) {
 	users := c.QueryParam("users")
 	userList := parseUsers(users)
 
 	var ss Submissions
 	for _, user := range userList {
 		query := fmt.Sprintf("SELECT id, submission_id, handle, contest_id, index, programming_language, verdict FROM submission WHERE handle = '%s'", user)
-		rows, err := a.Db.Query(query)
+		rows, err := d.Db.Query(query)
 		defer rows.Close()
 		if err != nil {
 			return err

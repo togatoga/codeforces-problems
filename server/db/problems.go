@@ -1,4 +1,4 @@
-package api
+package db
 
 import (
 	"net/http"
@@ -24,8 +24,8 @@ type Problems struct {
 }
 
 //Problems returns json data for all problems from db
-func (a *API) Problems(c echo.Context) (err error) {
-	rows, err := a.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count FROM problem")
+func (d *DB) Problems(c echo.Context) (err error) {
+	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count FROM problem")
 	defer rows.Close()
 	if err != nil {
 		return err
