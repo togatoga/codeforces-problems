@@ -23,16 +23,48 @@ export default class ProblemList extends React.Component {
   }
   tagsFormatter(data) {
     const tags = data.map((tag, idx) => (
-      <Badge key={idx} variant="success">
+      <Badge key={idx} variant="info">
         {tag}
       </Badge>
     ));
     return <span>{tags}</span>;
   }
+
   render() {
-    const { problems } = this.props;
+    const { problems, user, rivals } = this.props;
+
+    const OKResult = user.filter(item => item.verdict === "OK");
+    const WAResult = user.filter(item => item.verdict !== "OK");
+    const RivalOKResult = rivals.filter(item => item.verdict === "OK");
+
     return (
-      <BootstrapTable data={problems} striped={true} hover={true}>
+      <BootstrapTable
+        data={problems}
+        striped={true}
+        hover={true}
+        trClassName={row => {
+          const OK = OKResult.some(
+            value =>
+              value.contest_id == row.contest_id && value.index === row.index
+          );
+          const WA = WAResult.some(
+            value =>
+              value.contest_id === row.contest_id && value.index === row.index
+          );
+          const rivalOK = RivalOKResult.some(
+            value =>
+              value.contest_id === row.contest_id && value.index === row.index
+          );
+          if (OK) {
+            return "table-success";
+          } else if (WA) {
+            return "table-danger";
+          } else if (rivalOK) {
+            return "table-warning";
+          }
+          return "";
+        }}
+      >
         <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
 
         <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>

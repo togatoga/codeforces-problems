@@ -2,8 +2,8 @@ import fetch from "cross-fetch";
 
 export const REQUEST_PROBLEMS = "REQUEST_PROBLEMS";
 export const RECEIVE_PROBLEMS = "RECEIVE_PROBLEMS";
-export const REQUEST_USERS = "REQUEST_USERS";
-export const RECEIVE_USERS = "RECEIVE_USERS";
+export const REQUEST_SUBMISSIONS = "REQUEST_USERS";
+export const RECEIVE_SUBMISSIONS = "RECEIVE_USERS";
 
 function requestProblems() {
   return {
@@ -27,31 +27,35 @@ export function fetchProblems() {
   };
 }
 
-function requestUsers(user, rivals) {
+function requestSubmissions(user, rivals) {
   return {
-    type: REQUEST_USERS,
+    type: REQUEST_SUBMISSIONS,
     user: user,
     rivals: rivals
   };
 }
 
-function receiveUsers(user, rivals) {
+function receiveSubmissions(user, rivals) {
   return {
-    type: RECEIVE_USERS,
-    user: json.users,
-    rivals: json.rivals
+    type: RECEIVE_SUBMISSIONS,
+    user: user,
+    rivals: rivals
   };
 }
 
-export function fetchUsers(user, rivals) {
+export function fetchSubmissions(user, rivals) {
   const listUser = user.concat(",", rivals);
-  console.log(listUser);
+
   return dispatch => {
-    dispatch(requestUsers(user, rivals));
-    return fetch(`http://localhost:1323/v1/users?users=${listUser}`)
+    dispatch(requestSubmissions(user, rivals));
+    return fetch(`http://localhost:1323/v1/submissions?users=${listUser}`)
       .then(response => response.json())
       .then(json => {
-        dispatch(receiveUsers(user, rivals));
+        const userJSON = json.submissions.filter(item => item.handle === user);
+        const rivalsJSON = json.submissions.filter(
+          item => item.handle !== user
+        );
+        dispatch(receiveSubmissions(userJSON, rivalsJSON));
       });
   };
 }

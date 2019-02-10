@@ -9,7 +9,7 @@ import {
   Col,
   Row
 } from "react-bootstrap";
-import { fetchUsers } from "../actions/actions";
+import { fetchSubmissions } from "../actions/actions";
 
 class ComponentSearchForm extends React.Component {
   constructor(props) {
@@ -23,8 +23,7 @@ class ComponentSearchForm extends React.Component {
   }
   handleSubmit(e) {
     e.preventDefault();
-    console.log(this.state);
-    this.props.fetchUsers(this.state.user, this.state.rivals);
+    this.props.fetchSubmissions(this.state.user, this.state.rivals);
   }
   render() {
     return (
@@ -51,11 +50,9 @@ class ComponentSearchForm extends React.Component {
             />
           </FormGroup>
         </Form.Row>
-        <Form.Row>
-          <FormGroup as={Row}>
-            <Button type="submit">Search</Button>
-          </FormGroup>
-        </Form.Row>
+        <FormGroup>
+          <Button type="submit">Search</Button>
+        </FormGroup>
       </Form>
     );
   }
@@ -63,7 +60,7 @@ class ComponentSearchForm extends React.Component {
 
 function mapDispatchToProps(dispatch) {
   return {
-    fetchUsers: (user, rivals) => dispatch(fetchUsers(user, rivals))
+    fetchSubmissions: (user, rivals) => dispatch(fetchSubmissions(user, rivals))
   };
 }
 const SearchForm = connect(

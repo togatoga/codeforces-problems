@@ -1,9 +1,5 @@
 import { combineReducers } from "redux";
-import {
-  RECEIVE_PROBLEMS,
-  RECEIVE_USERS,
-  REQUEST_USERS
-} from "../actions/actions";
+import { RECEIVE_PROBLEMS, RECEIVE_SUBMISSIONS } from "../actions/actions";
 
 function problemsByApi(state = { problems: [] }, action) {
   switch (action.type) {
@@ -16,9 +12,9 @@ function problemsByApi(state = { problems: [] }, action) {
   }
 }
 
-function usersByApi(state = { user: {}, rivals: {} }, action) {
+function usersByApi(state = { user: [], rivals: [] }, action) {
   switch (action.type) {
-    case RECEIVE_USERS:
+    case RECEIVE_SUBMISSIONS:
       return Object.assign({}, state, {
         user: action.user,
         rivals: action.rivals
