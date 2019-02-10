@@ -92,7 +92,8 @@ func (d *DB) Submissions(c echo.Context) (err error) {
 		//Check whether need to update submission db
 		err := d.updateSubmissionIfNeeded(user)
 		if err != nil {
-			return err
+			c.Echo().Logger.Errorf(err.Error())
+			continue
 		}
 
 		query := fmt.Sprintf("SELECT id, submission_id, handle, contest_id, index, programming_language, verdict FROM submission WHERE handle = '%s'", user)
@@ -112,5 +113,6 @@ func (d *DB) Submissions(c echo.Context) (err error) {
 			ss.Submissions = append(ss.Submissions, s)
 		}
 	}
+
 	return c.JSON(http.StatusOK, ss)
 }
