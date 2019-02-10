@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { fetchProblems } from "../actions/actions";
 import ProblemList from "../components/ProblemList";
 import SearchForm from "../components/SearchForm";
+import NavigationBar from "../components/NavigationBar";
 import { connect } from "react-redux";
 import { Container, Row } from "react-bootstrap";
 
@@ -17,20 +18,23 @@ class AsyncApp extends Component {
   render() {
     const { problems, user, rivals } = this.props;
     return (
-      <Container>
+      <div>
+        <NavigationBar />
         <Container>
-          <Row>
-            <SearchForm user={user} rivals={rivals} />
-          </Row>
+          <Container>
+            <Row>
+              <SearchForm user={user} rivals={rivals} />
+            </Row>
+          </Container>
+          <Container>
+            <Row>
+              {problems.length > 0 && (
+                <ProblemList problems={problems} user={user} rivals={rivals} />
+              )}
+            </Row>
+          </Container>
         </Container>
-        <Container>
-          <Row>
-            {problems.length > 0 && (
-              <ProblemList problems={problems} user={user} rivals={rivals} />
-            )}
-          </Row>
-        </Container>
-      </Container>
+      </div>
     );
   }
 }
