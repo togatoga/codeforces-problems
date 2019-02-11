@@ -73,7 +73,7 @@ func (d *DB) updateSubmissionIfNeeded(user string) (err error) {
 		programmingLanguage := submission.ProgrammingLanguage
 		verdict := submission.Verdict
 		var id int
-		query := "INSERT INTO submission(submission_id, contest_id, index, handle, programming_language, verdict) VALUES($1, $2, $3, $4, $5, $6) RETURNING id"
+		query := "INSERT INTO submission(submission_id, contest_id, index, handle, programming_language, verdict) VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT(submission_id) DO NOTHING RETURNING id"
 		err := d.Db.QueryRow(query, submissionID, contestID, index, handle, programmingLanguage, verdict).Scan(&id)
 		if err != nil {
 			return err

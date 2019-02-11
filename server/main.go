@@ -12,6 +12,7 @@ import (
 func main() {
 	e := echo.New()
 	//work around
+	e.Debug = true
 	e.Use(middleware.CORS())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

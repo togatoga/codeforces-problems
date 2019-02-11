@@ -22,6 +22,7 @@ type Problem struct {
 	Points      int      `json:"points"`
 	Tags        []string `json:"tags"`
 	SolvedCount int      `json:"solved_count"`
+	UniqueKey   string   `json:"unique_key"`
 }
 
 type Problems struct {
@@ -67,7 +68,8 @@ func (d *DB) updateProblemIfNeeded() (err error) {
 		contestID := statistics.ContestID
 		index := statistics.Index
 		solvedCnt := statistics.SolvedCount
-		mapToSolvedCnt[strconv.Itoa(contestID)+"_"+index] = solvedCnt
+		uniqueKey := strconv.Itoa(contestID) + "_" + index
+		mapToSolvedCnt[uniqueKey] = solvedCnt
 	}
 
 	for _, problem := range problems.Problems {
@@ -78,9 +80,11 @@ func (d *DB) updateProblemIfNeeded() (err error) {
 		name := problem.Name
 		points := problem.Points
 		tags := problem.Tags
-		solvedCnt := mapToSolvedCnt[strconv.Itoa(contestID)+"_"+index]
+		uniqueKey := strconv.Itoa(contestID) + "_" + index
+		solvedCnt := mapToSolvedCnt[uniqueKey]
+
 		updateDate := time.Now()
-		err := d.Db.QueryRow("INSERT INTO problem(contest_id, name, index, points, tags, solved_count, update_date) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id", contestID, name, index, points, pq.Array(tags), solvedCnt, updateDate).Scan(&id)
+		err := d.Db.QueryRow("INSERT INTO problem(contest_id, name, index, points, tags, solved_count, unique_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(unique_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id", contestID, name, index, points, pq.Array(tags), solvedCnt, uniqueKey, updateDate).Scan(&id)
 		if err != nil {
 			return err
 		}
@@ -97,7 +101,7 @@ func (d *DB) Problems(c echo.Context) (err error) {
 		return err
 	}
 
-	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count FROM problem")
+	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count, unique_key FROM problem")
 	defer rows.Close()
 	if err != nil {
 		return err
@@ -105,7 +109,7 @@ func (d *DB) Problems(c echo.Context) (err error) {
 	var problems Problems
 	for rows.Next() {
 		problem := new(Problem)
-		err := rows.Scan(&problem.ID, &problem.ContestID, &problem.Name, &problem.Index, &problem.Points, pq.Array(&problem.Tags), &problem.SolvedCount)
+		err := rows.Scan(&problem.ID, &problem.ContestID, &problem.Name, &problem.Index, &problem.Points, pq.Array(&problem.Tags), &problem.SolvedCount, &problem.UniqueKey)
 		if err != nil {
 			return err
 		}
