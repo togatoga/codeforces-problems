@@ -84,7 +84,8 @@ func (d *DB) updateProblemIfNeeded() (err error) {
 		solvedCnt := mapToSolvedCnt[uniqueKey]
 
 		updateDate := time.Now()
-		err := d.Db.QueryRow("INSERT INTO problem(contest_id, name, index, points, tags, solved_count, unique_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(unique_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id", contestID, name, index, points, pq.Array(tags), solvedCnt, uniqueKey, updateDate).Scan(&id)
+		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, unique_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(unique_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
+		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, uniqueKey, updateDate).Scan(&id)
 		if err != nil {
 			return err
 		}

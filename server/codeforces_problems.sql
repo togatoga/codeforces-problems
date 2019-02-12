@@ -27,3 +27,17 @@ CREATE TABLE submission
     UNIQUE(unique_key),
     UNIQUE(submission_id)
 );
+
+DROP TABLE IF EXISTS contest;
+CREATE TABLE contest
+(
+    id SERIAL PRIMARY KEY
+    contest_id INTEGER,
+    name TEXT,
+    type TEXT,
+    phase TEXT,
+    frozen BOOLEAN,
+    duration_seconds INTEGER,
+    start_unix_time INTEGER,
+    UNIQUE(contest_id)
+);
