@@ -1,5 +1,9 @@
 import { combineReducers } from "redux";
-import { RECEIVE_PROBLEMS, RECEIVE_SUBMISSIONS } from "../actions/actions";
+import {
+  RECEIVE_PROBLEMS,
+  RECEIVE_SUBMISSIONS,
+  RECEIVE_CONTESTS
+} from "../actions/actions";
 
 function problemsByApi(state = { problems: [] }, action) {
   switch (action.type) {
@@ -24,9 +28,21 @@ function usersByApi(state = { user: [], rivals: [] }, action) {
   }
 }
 
+function contestsByApi(state = { contests: [] }, action) {
+  switch (action.type) {
+    case RECEIVE_CONTESTS:
+      return Object.assign({}, state, {
+        contests: action.contests
+      });
+    default:
+      return state;
+  }
+}
+
 const rootReducer = combineReducers({
   problemsByApi,
-  usersByApi
+  usersByApi,
+  contestsByApi
 });
 
 export default rootReducer;

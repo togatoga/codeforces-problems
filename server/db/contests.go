@@ -6,16 +6,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-// id SERIAL PRIMARY KEY
-//     contest_id INTEGER,
-//     name TEXT,
-//     type TEXT,
-//     phase TEXT,
-//     frozen BOOLEAN,
-//     duration_seconds INTEGER,
-//     start_unix_time INTEGER,
-//     UNIQUE(contest_id)
-//Contest represents the struct for the client
 type Contest struct {
 	ID              int    `json:"id"`
 	ContestID       int    `json:"contest_id"`
@@ -33,6 +23,5 @@ type Contests struct {
 
 func (d *DB) Contests(c echo.Context) (err error) {
 	var contests Contests
-
 	return c.JSON(http.StatusOK, contests)
 }

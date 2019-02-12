@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { fetchProblems } from "../actions/actions";
+import { fetchProblems, fetchContests } from "../actions/actions";
 import ProblemList from "../components/ProblemList";
 import SearchForm from "../components/SearchForm";
 import NavigationBar from "../components/NavigationBar";
@@ -14,6 +14,7 @@ class AsyncApp extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch(fetchProblems());
+    dispatch(fetchContests());
   }
   render() {
     const { problems, user, rivals } = this.props;
@@ -29,7 +30,12 @@ class AsyncApp extends Component {
           <Container>
             <Row>
               {problems.length > 0 && (
-                <ProblemList problems={problems} user={user} rivals={rivals} />
+                <ProblemList
+                  problems={problems}
+                  contests={contests}
+                  user={user}
+                  rivals={rivals}
+                />
               )}
             </Row>
           </Container>
@@ -40,12 +46,14 @@ class AsyncApp extends Component {
 }
 
 function mapStateToProps(state) {
-  const { problemsByApi, usersByApi } = state;
+  const { problemsByApi, usersByApi, contestsByApi } = state;
+  const { contests } = contestsByApi;
   const { problems } = problemsByApi;
   const { user, rivals } = usersByApi;
 
   return {
     problems,
+    contests,
     user,
     rivals
   };

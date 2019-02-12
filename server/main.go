@@ -24,6 +24,7 @@ func main() {
 	}
 	//from db
 	e.GET("/v1/problems", db.Problems)
+	e.GET("/v1/contests", db.Contests)
 	e.GET("/v1/submissions", db.Submissions)
 
 	e.Logger.Fatal(e.Start(":1323"))

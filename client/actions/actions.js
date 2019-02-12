@@ -4,6 +4,8 @@ export const REQUEST_PROBLEMS = "REQUEST_PROBLEMS";
 export const RECEIVE_PROBLEMS = "RECEIVE_PROBLEMS";
 export const REQUEST_SUBMISSIONS = "REQUEST_USERS";
 export const RECEIVE_SUBMISSIONS = "RECEIVE_USERS";
+export const REQUEST_CONTESTS = "REQUEST_CONTESTS";
+export const RECEIVE_CONTESTS = "RECIEVE_CONTESTS";
 
 function requestProblems() {
   return {
@@ -57,5 +59,27 @@ export function fetchSubmissions(user, rivals) {
         );
         dispatch(receiveSubmissions(userJSON, rivalsJSON));
       });
+  };
+}
+
+function requestContests() {
+  return {
+    type: REQUEST_CONTESTS
+  };
+}
+
+function receiveContests(json) {
+  return {
+    type: RECEIVE_CONTESTS,
+    contests: json.contests
+  };
+}
+
+export function fetchContests() {
+  return dispatch => {
+    dispatch(requestContests());
+    return fetch(`http://localhost:1323/v1/contests`)
+      .then(response => response.json())
+      .then(json => dispatch(receiveContests(json)));
   };
 }
