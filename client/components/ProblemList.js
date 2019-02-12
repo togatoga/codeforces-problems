@@ -31,7 +31,12 @@ export default class ProblemList extends React.Component {
   }
 
   render() {
-    const { problems, user, rivals } = this.props;
+    const { problems, contests, user, rivals } = this.props;
+
+    const mapContestIdToName = contests.reduce(function(map, obj) {
+      map[obj.contest_id] = obj.name;
+      return map
+    }, {});
 
     const OKResult = user.filter(item => item.verdict === "OK");
     const WAResult = user.filter(item => item.verdict !== "OK");
@@ -58,9 +63,9 @@ export default class ProblemList extends React.Component {
           if (OK) {
             return "table-success";
           } else if (WA) {
-            return "table-danger";
-          } else if (rivalOK) {
             return "table-warning";
+          } else if (rivalOK) {
+            return "table-danger";
           }
           return "";
         }}
@@ -72,8 +77,15 @@ export default class ProblemList extends React.Component {
         </TableHeaderColumn>
         <TableHeaderColumn
           dataField="contest_id"
-          dataFormat={this.contestFormatter}
-          width="10%"
+          dataFormat={contest_id => {
+            const url = `http://codeforces.com/contest/${contest_id}`;
+            // console.log("Hello");
+            // console.log(mapContestIdToName[contest_id])
+            return (
+            <a href={url} target="_blank">{mapContestIdToName[contest_id]}</a>
+            )
+          }}
+          width="30%"
           dataSort={true}
         >
           Contest ID

@@ -31,13 +31,13 @@ CREATE TABLE submission
 DROP TABLE IF EXISTS contest;
 CREATE TABLE contest
 (
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
     contest_id INTEGER,
     name TEXT,
     type TEXT,
     phase TEXT,
     frozen BOOLEAN,
-    duration_seconds INTEGER,
-    start_unix_time INTEGER,
+    duration_seconds BIGINT,
+    start_unix_time BIGINT,
     UNIQUE(contest_id)
 );

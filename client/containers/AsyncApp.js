@@ -17,7 +17,7 @@ class AsyncApp extends Component {
     dispatch(fetchContests());
   }
   render() {
-    const { problems, user, rivals } = this.props;
+    const { problems, contests, user, rivals } = this.props;
     return (
       <div>
         <NavigationBar />

@@ -31,6 +31,7 @@ type Problems struct {
 
 func (d *DB) updateProblemIfNeeded() (err error) {
 	rows, err := d.Db.Query("SELECT COUNT(*) from problem")
+	defer rows.Close()
 	if err != nil {
 		return err
 	}
