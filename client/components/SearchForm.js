@@ -21,6 +21,7 @@ class ComponentSearchForm extends React.Component {
       rivals: ""
     };
   }
+
   handleSubmit(e) {
     e.preventDefault();
     this.props.fetchSubmissions(this.state.user, this.state.rivals);

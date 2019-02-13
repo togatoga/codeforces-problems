@@ -8,9 +8,9 @@ CREATE TABLE problem
     points INTEGER,
     tags TEXT[],
     solved_count INTEGER,
-    unique_key TEXT,
+    problem_key TEXT,
     update_date TIMESTAMP,
-    UNIQUE(unique_key),
+    UNIQUE(problem_key),
     UNIQUE(contest_id, index)
 );
 DROP TABLE IF EXISTS submission;
@@ -21,10 +21,10 @@ CREATE TABLE submission
     handle TEXT,
     contest_id INTEGER,
     index TEXT,
+    create_unix_time BIGINT,
     programming_language TEXT,
     verdict TEXT,
-    unique_key TEXT,
-    UNIQUE(unique_key),
+    problem_key TEXT,
     UNIQUE(submission_id)
 );
 

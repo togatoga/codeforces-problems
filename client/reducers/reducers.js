@@ -2,7 +2,8 @@ import { combineReducers } from "redux";
 import {
   RECEIVE_PROBLEMS,
   RECEIVE_SUBMISSIONS,
-  RECEIVE_CONTESTS
+  RECEIVE_CONTESTS,
+  RECEIVE_FILTERS
 } from "../actions/actions";
 
 function problemsByApi(state = { problems: [] }, action) {
@@ -39,10 +40,32 @@ function contestsByApi(state = { contests: [] }, action) {
   }
 }
 
+function filtersByUser(
+  state = {
+    filters: {
+      not_solve: false,
+      ac: false,
+      rivals_ac: false,
+      failed: false
+    }
+  },
+  action
+) {
+  switch (action.type) {
+    case RECEIVE_FILTERS:
+      return Object.assign({}, state, {
+        filters: action.filters
+      });
+    default:
+      return state;
+  }
+}
+
 const rootReducer = combineReducers({
   problemsByApi,
   usersByApi,
-  contestsByApi
+  contestsByApi,
+  filtersByUser
 });
 
 export default rootReducer;

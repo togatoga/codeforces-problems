@@ -6,6 +6,8 @@ export const REQUEST_SUBMISSIONS = "REQUEST_USERS";
 export const RECEIVE_SUBMISSIONS = "RECEIVE_USERS";
 export const REQUEST_CONTESTS = "REQUEST_CONTESTS";
 export const RECEIVE_CONTESTS = "RECIEVE_CONTESTS";
+export const SET_FILTERS = "SET_FILTERS";
+export const RECEIVE_FILTERS = "RECIEVE_FILTERS";
 
 function requestProblems() {
   return {
@@ -79,7 +81,25 @@ export function fetchContests() {
   return dispatch => {
     dispatch(requestContests());
     return fetch(`http://localhost:1323/v1/contests`)
-      .then(response => response.json())
+      .then(response => {
+        if (response.status >= 400) {
+          throw new Error("Bad response from server");
+        }
+        return response.json();
+      })
       .then(json => dispatch(receiveContests(json)));
+  };
+}
+
+function receiveFilters(filters) {
+  return {
+    type: RECEIVE_FILTERS,
+    filters: filters
+  };
+}
+
+export function setFilters(filters) {
+  return dispatch => {
+    return dispatch(receiveFilters(filters));
   };
 }

@@ -1,8 +1,18 @@
 import React from "react";
 import { Badge } from "react-bootstrap";
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
+import ProblemFilter from "./ProblemFilter";
 
 export default class ProblemList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.updateState = this.updateState.bind(this);
+    const { contests } = this.props;
+    this.mapContestIdToName = contests.reduce(function(map, obj) {
+      map[obj.contest_id] = obj.name;
+      return map;
+    }, {});
+  }
   nameFormatter(name, row) {
     const { contest_id, index } = row;
     const url = `http://codeforces.com/problemset/problem/${contest_id}/${index}`;
@@ -27,79 +37,137 @@ export default class ProblemList extends React.Component {
         {tag}
       </Badge>
     ));
-    return <span>{tags}</span>;
+    return <div>{tags}</div>;
+  }
+  solvedCountFormatter(solved_count) {
+    return <div>{solved_count}</div>;
+  }
+  updateState(state) {
+    this.setState(state);
   }
 
   render() {
-    const { problems, contests, user, rivals } = this.props;
-
-    const mapContestIdToName = contests.reduce(function(map, obj) {
-      map[obj.contest_id] = obj.name;
-      return map
-    }, {});
+    const { problems, user, rivals, filters } = this.props;
 
     const OKResult = user.filter(item => item.verdict === "OK");
-    const WAResult = user.filter(item => item.verdict !== "OK");
+    const WAResult = user.filter(
+      item =>
+        item.verdict !== "OK" &&
+        !OKResult.some(value => value.problem_key === item.problem_key)
+    );
     const RivalOKResult = rivals.filter(item => item.verdict === "OK");
+    console.log(OKResult);
+    const filteredProblems = problems.filter(problem => {
+      if (
+        !(
+          filters.ac ||
+          filters.failed ||
+          filters.not_solve ||
+          filters.rivals_ac
+        )
+      ) {
+        return true;
+      }
+
+      if (filters.ac || filters.not_solve) {
+        const AC = OKResult.some(
+          value => value.problem_key === problem.problem_key
+        );
+        if (AC && filters.ac) {
+          return true;
+        }
+        if (!AC && filters.not_solve) {
+          return true;
+        }
+      }
+      if (filters.failed) {
+        const failed = WAResult.some(
+          value => value.problem_key === problem.problem_key
+        );
+        if (failed) {
+          return true;
+        }
+      }
+      if (filters.rivals_ac) {
+        const rivalsAC = RivalOKResult.some(
+          value =>
+            value.problem_key === problem.problem_key &&
+            !OKResult.some(user => user.problem_key === value.problem_key)
+        );
+        if (rivalsAC) {
+          return true;
+        }
+      }
+
+      return false;
+    });
 
     return (
-      <BootstrapTable
-        data={problems}
-        striped={true}
-        hover={true}
-        trClassName={row => {
-          const OK = OKResult.some(
-            value =>
-              value.contest_id == row.contest_id && value.index === row.index
-          );
-          const WA = WAResult.some(
-            value =>
-              value.contest_id === row.contest_id && value.index === row.index
-          );
-          const rivalOK = RivalOKResult.some(
-            value =>
-              value.contest_id === row.contest_id && value.index === row.index
-          );
-          if (OK) {
-            return "table-success";
-          } else if (WA) {
-            return "table-warning";
-          } else if (rivalOK) {
-            return "table-danger";
-          }
-          return "";
-        }}
-      >
-        <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
-
-        <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
-          Problem
-        </TableHeaderColumn>
-        <TableHeaderColumn
-          dataField="contest_id"
-          dataFormat={contest_id => {
-            const url = `http://codeforces.com/contest/${contest_id}`;
-            // console.log("Hello");
-            // console.log(mapContestIdToName[contest_id])
-            return (
-            <a href={url} target="_blank">{mapContestIdToName[contest_id]}</a>
-            )
+      <div>
+        <ProblemFilter filters={filters} updateState={this.updateState} />
+        <BootstrapTable
+          data={filteredProblems}
+          striped={true}
+          hover={true}
+          trClassName={row => {
+            const OK = OKResult.some(
+              value =>
+                value.contest_id == row.contest_id && value.index === row.index
+            );
+            const WA = WAResult.some(
+              value =>
+                value.contest_id === row.contest_id && value.index === row.index
+            );
+            const rivalOK = RivalOKResult.some(
+              value =>
+                value.contest_id === row.contest_id && value.index === row.index
+            );
+            if (OK) {
+              return "table-success";
+            } else if (WA) {
+              return "table-warning";
+            } else if (rivalOK) {
+              return "table-danger";
+            }
+            return "";
           }}
-          width="30%"
-          dataSort={true}
         >
-          Contest ID
-        </TableHeaderColumn>
-        <TableHeaderColumn dataField="points" width="10%" dataSort={true}>
-          Points
-        </TableHeaderColumn>
-        <TableHeaderColumn dataField="solved_count" width="10%" dataSort={true}>
-          Solved
-        </TableHeaderColumn>
-        <TableHeaderColumn dataField="tags" dataFormat={this.tagsFormatter}>
-          Tags
-        </TableHeaderColumn>
-      </BootstrapTable>
+          <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
+
+          <TableHeaderColumn
+            dataField="contest_id"
+            dataFormat={contest_id => {
+              const url = `http://codeforces.com/contest/${contest_id}`;
+              return (
+                <a href={url} target="_blank">
+                  {this.mapContestIdToName[contest_id] || "No Name"}
+                </a>
+              );
+            }}
+            width="30%"
+            dataSort={true}
+          >
+            Contest ID
+          </TableHeaderColumn>
+
+          <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
+            Problem
+          </TableHeaderColumn>
+          <TableHeaderColumn
+            dataField="solved_count"
+            dataSort={true}
+            width="10%"
+            dataFromat={this.solvedCountFormatter}
+          >
+            Solved
+          </TableHeaderColumn>
+
+          {/* <TableHeaderColumn>Last Submit Date</TableHeaderColumn> */}
+          <TableHeaderColumn dataField="tags" dataFormat={this.tagsFormatter}>
+            Tags
+          </TableHeaderColumn>
+        </BootstrapTable>
+      </div>
     );
   }
 }

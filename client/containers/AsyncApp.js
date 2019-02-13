@@ -1,8 +1,9 @@
 import React, { Component } from "react";
-import { fetchProblems, fetchContests } from "../actions/actions";
+import { fetchProblems, fetchContests, setFilters } from "../actions/actions";
 import ProblemList from "../components/ProblemList";
 import SearchForm from "../components/SearchForm";
 import NavigationBar from "../components/NavigationBar";
+import ProblemFilter from "../components/ProblemFilter";
 import { connect } from "react-redux";
 import { Container, Row } from "react-bootstrap";
 
@@ -17,7 +18,8 @@ class AsyncApp extends Component {
     dispatch(fetchContests());
   }
   render() {
-    const { problems, contests, user, rivals } = this.props;
+    const { problems, contests, user, rivals, filters } = this.props;
+
     return (
       <div>
         <NavigationBar />
@@ -35,6 +37,7 @@ class AsyncApp extends Component {
                   contests={contests}
                   user={user}
                   rivals={rivals}
+                  filters={filters}
                 />
               )}
             </Row>
@@ -46,16 +49,18 @@ class AsyncApp extends Component {
 }
 
 function mapStateToProps(state) {
-  const { problemsByApi, usersByApi, contestsByApi } = state;
-  const { contests } = contestsByApi;
+  const { problemsByApi, contestsByApi, usersByApi, filtersByUser } = state;
   const { problems } = problemsByApi;
+  const { contests } = contestsByApi;
   const { user, rivals } = usersByApi;
-
+  const { filters } = filtersByUser;
+  console.log(filters);
   return {
     problems,
     contests,
     user,
-    rivals
+    rivals,
+    filters
   };
 }
 

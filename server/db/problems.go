@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/lib/pq"
@@ -22,7 +21,7 @@ type Problem struct {
 	Points      int      `json:"points"`
 	Tags        []string `json:"tags"`
 	SolvedCount int      `json:"solved_count"`
-	UniqueKey   string   `json:"unique_key"`
+	ProblemKey  string   `json:"problem_key"`
 }
 
 type Problems struct {
@@ -69,8 +68,8 @@ func (d *DB) updateProblemIfNeeded() (err error) {
 		contestID := statistics.ContestID
 		index := statistics.Index
 		solvedCnt := statistics.SolvedCount
-		uniqueKey := strconv.Itoa(contestID) + "_" + index
-		mapToSolvedCnt[uniqueKey] = solvedCnt
+		problemKey := getProblemKey(contestID, index)
+		mapToSolvedCnt[problemKey] = solvedCnt
 	}
 
 	for _, problem := range problems.Problems {
@@ -81,12 +80,12 @@ func (d *DB) updateProblemIfNeeded() (err error) {
 		name := problem.Name
 		points := problem.Points
 		tags := problem.Tags
-		uniqueKey := strconv.Itoa(contestID) + "_" + index
-		solvedCnt := mapToSolvedCnt[uniqueKey]
+		problemKey := getProblemKey(contestID, index)
+		solvedCnt := mapToSolvedCnt[problemKey]
 
 		updateDate := time.Now()
-		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, unique_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(unique_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
-		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, uniqueKey, updateDate).Scan(&id)
+		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, problem_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(problem_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
+		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, problemKey, updateDate).Scan(&id)
 		if err != nil {
 			return err
 		}
@@ -103,7 +102,7 @@ func (d *DB) Problems(c echo.Context) (err error) {
 		return err
 	}
 
-	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count, unique_key FROM problem")
+	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count, problem_key FROM problem")
 	defer rows.Close()
 	if err != nil {
 		return err
@@ -111,7 +110,7 @@ func (d *DB) Problems(c echo.Context) (err error) {
 	var problems Problems
 	for rows.Next() {
 		problem := new(Problem)
-		err := rows.Scan(&problem.ID, &problem.ContestID, &problem.Name, &problem.Index, &problem.Points, pq.Array(&problem.Tags), &problem.SolvedCount, &problem.UniqueKey)
+		err := rows.Scan(&problem.ID, &problem.ContestID, &problem.Name, &problem.Index, &problem.Points, pq.Array(&problem.Tags), &problem.SolvedCount, &problem.ProblemKey)
 		if err != nil {
 			return err
 		}

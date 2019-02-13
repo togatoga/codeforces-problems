@@ -17,8 +17,10 @@ type Submission struct {
 	Handle              string `json:"handle"`
 	ContestID           int    `json:"contest_id"`
 	Index               string `json:"index"`
+	CreateUnixTime      int64  `json:"create_unix_time"`
 	ProgrammingLanguage string `json:"programming_language"`
 	Verdict             string `json:"verdict"`
+	ProblemKey          string `json:"problem_key"`
 }
 
 type Submissions struct {
@@ -70,11 +72,13 @@ func (d *DB) updateSubmissionIfNeeded(user string) (err error) {
 		contestID := submission.Problem.ContestID
 		index := submission.Problem.Index
 		handle := user
+		createUnixTime := submission.CreationTimeSeconds
 		programmingLanguage := submission.ProgrammingLanguage
 		verdict := submission.Verdict
+		problemKey := getProblemKey(contestID, index)
 		var id int
-		query := "INSERT INTO submission(submission_id, contest_id, index, handle, programming_language, verdict) VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT(submission_id) DO NOTHING RETURNING id"
-		err := d.Db.QueryRow(query, submissionID, contestID, index, handle, programmingLanguage, verdict).Scan(&id)
+		query := "INSERT INTO submission(submission_id, contest_id, index, handle, create_unix_time, programming_language, verdict, problem_key) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(submission_id) DO NOTHING RETURNING id"
+		err := d.Db.QueryRow(query, submissionID, contestID, index, handle, createUnixTime, programmingLanguage, verdict, problemKey).Scan(&id)
 		if err != nil {
 			return err
 		}
@@ -96,7 +100,7 @@ func (d *DB) Submissions(c echo.Context) (err error) {
 			continue
 		}
 
-		query := fmt.Sprintf("SELECT id, submission_id, handle, contest_id, index, programming_language, verdict FROM submission WHERE handle = '%s'", user)
+		query := fmt.Sprintf("SELECT id, submission_id, handle, contest_id, index, create_unix_time, programming_language, verdict, problem_key FROM submission WHERE handle = '%s'", user)
 		rows, err := d.Db.Query(query)
 
 		defer rows.Close()
@@ -106,7 +110,7 @@ func (d *DB) Submissions(c echo.Context) (err error) {
 
 		for rows.Next() {
 			s := new(Submission)
-			err := rows.Scan(&s.ID, &s.SubmissionID, &s.Handle, &s.ContestID, &s.Index, &s.ProgrammingLanguage, &s.Verdict)
+			err := rows.Scan(&s.ID, &s.SubmissionID, &s.Handle, &s.ContestID, &s.Index, &s.CreateUnixTime, &s.ProgrammingLanguage, &s.Verdict, &s.ProblemKey)
 			if err != nil {
 				return err
 			}
