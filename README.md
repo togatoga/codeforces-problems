@@ -1,5 +1,10 @@
 # Codeforces problems
 
+## Summary
+
+codeforces-problems is the problem manegement tool for [Codeforces](http://codeforces.com) users.  
+This project is inspired by [AtCoder Problems](https://kenkoooo.com/atcoder).
+
 ## Backend
 
 ### Usage
