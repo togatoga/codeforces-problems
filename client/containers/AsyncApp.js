@@ -54,7 +54,7 @@ function mapStateToProps(state) {
   const { contests } = contestsByApi;
   const { user, rivals } = usersByApi;
   const { filters } = filtersByUser;
-  console.log(filters);
+
   return {
     problems,
     contests,

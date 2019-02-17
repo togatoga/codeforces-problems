@@ -56,7 +56,7 @@ export default class ProblemList extends React.Component {
         !OKResult.some(value => value.problem_key === item.problem_key)
     );
     const RivalOKResult = rivals.filter(item => item.verdict === "OK");
-    console.log(OKResult);
+
     const filteredProblems = problems.filter(problem => {
       if (
         !(
