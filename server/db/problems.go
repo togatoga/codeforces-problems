@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-//Problem represents a struct for the view
+//Problem represents a Codefoces problem
 type Problem struct {
 	ID          int      `json:"id"`
 	ContestID   int      `json:"contest_id"`
@@ -24,8 +24,50 @@ type Problem struct {
 	ProblemKey  string   `json:"problem_key"`
 }
 
+//Problems represents Codeforces problems
 type Problems struct {
 	Problems []*Problem `json:"problems"`
+}
+
+func getMapContestIDToSolvedCnt(problemStatistics []goforces.ProblemStatistics) map[string]int {
+	mapContestIDToSolvedCnt := map[string]int{}
+	for _, statistics := range problemStatistics {
+		contestID := statistics.ContestID
+		index := statistics.Index
+		solvedCnt := statistics.SolvedCount
+		problemKey := getProblemKey(contestID, index)
+		mapContestIDToSolvedCnt[problemKey] = solvedCnt
+	}
+	return mapContestIDToSolvedCnt
+}
+
+func (d *DB) updateProblemTableIfNeeded(problems *goforces.Problems) (err error) {
+	mapContestIDToSolvedCnt := getMapContestIDToSolvedCnt(problems.ProblemStatistics)
+	sort.Slice(problems.Problems, func(i, j int) bool {
+		if problems.Problems[i].ContestID != problems.Problems[j].ContestID {
+			return problems.Problems[i].ContestID < problems.Problems[i].ContestID
+		}
+		return problems.Problems[i].Index < problems.Problems[j].Index
+	})
+
+	for _, problem := range problems.Problems {
+		//INSERT
+		var id int
+		contestID := problem.ContestID
+		index := problem.Index
+		name := problem.Name
+		points := problem.Points
+		tags := problem.Tags
+		problemKey := getProblemKey(contestID, index)
+		solvedCnt := mapContestIDToSolvedCnt[problemKey]
+
+		updateDate := time.Now()
+		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, problem_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(problem_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
+		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, problemKey, updateDate).Scan(&id)
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func (d *DB) updateProblemIfNeeded() (err error) {
@@ -56,41 +98,9 @@ func (d *DB) updateProblemIfNeeded() (err error) {
 		return err
 	}
 
-	sort.Slice(problems.Problems, func(i, j int) bool {
-		if problems.Problems[i].ContestID != problems.Problems[j].ContestID {
-			return problems.Problems[i].ContestID < problems.Problems[i].ContestID
-		}
-		return problems.Problems[i].Index < problems.Problems[j].Index
-	})
-
-	mapToSolvedCnt := map[string]int{}
-	for _, statistics := range problems.ProblemStatistics {
-		contestID := statistics.ContestID
-		index := statistics.Index
-		solvedCnt := statistics.SolvedCount
-		problemKey := getProblemKey(contestID, index)
-		mapToSolvedCnt[problemKey] = solvedCnt
+	if err = d.updateProblemTableIfNeeded(problems); err != nil {
+		return err
 	}
-
-	for _, problem := range problems.Problems {
-		//INSERT
-		var id int
-		contestID := problem.ContestID
-		index := problem.Index
-		name := problem.Name
-		points := problem.Points
-		tags := problem.Tags
-		problemKey := getProblemKey(contestID, index)
-		solvedCnt := mapToSolvedCnt[problemKey]
-
-		updateDate := time.Now()
-		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, problem_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(problem_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
-		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, problemKey, updateDate).Scan(&id)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
