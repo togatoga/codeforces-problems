@@ -19,6 +19,9 @@ export default class NavigationBar extends React.Component {
             <NavDropdown.Item href="https://kenkoooo.com/atcoder/">
               AtCoder Problems
             </NavDropdown.Item>
+            <NavDropdown.Item href="https://github.com/togatoga/codeforces-problems">
+              GitHub
+            </NavDropdown.Item>
             <NavDropdown.Item href="https://twitter.com/togatoga_">
               @togatoga_
             </NavDropdown.Item>
