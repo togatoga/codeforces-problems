@@ -68,6 +68,7 @@ func (d *DB) updateProblemTableIfNeeded(problems *goforces.Problems) (err error)
 			return err
 		}
 	}
+	return nil
 }
 
 func (d *DB) updateProblemIfNeeded() (err error) {
