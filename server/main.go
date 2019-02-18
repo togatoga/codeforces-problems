@@ -27,5 +27,8 @@ func main() {
 	e.GET("api/v1/contests", db.Contests)
 	e.GET("api/v1/submissions", db.Submissions)
 
+	//update data
+	//e.POST("api/v1/problems", db.UpdateProblems)
+
 	e.Logger.Fatal(e.Start(":1323"))
 }
