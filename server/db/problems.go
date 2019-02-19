@@ -110,7 +110,7 @@ func (d *DB) UpdateProblems(c echo.Context) (err error) {
 
 //Problems returns json data for all problems from db
 func (d *DB) Problems(c echo.Context) (err error) {
-	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count, problem_key FROM problem")
+	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count, problem_key FROM problem ORDER BY id DESC")
 	defer rows.Close()
 	if err != nil {
 		return err
