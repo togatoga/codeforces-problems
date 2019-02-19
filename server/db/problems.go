@@ -45,7 +45,7 @@ func converToProblems(apiProblems *goforces.Problems) (problems Problems) {
 	mapContestIDToSolvedCnt := getMapContestIDToSolvedCnt(apiProblems.ProblemStatistics)
 	sort.Slice(apiProblems.Problems, func(i, j int) bool {
 		if apiProblems.Problems[i].ContestID != apiProblems.Problems[j].ContestID {
-			return apiProblems.Problems[i].ContestID < apiProblems.Problems[i].ContestID
+			return apiProblems.Problems[i].ContestID < apiProblems.Problems[j].ContestID
 		}
 		return apiProblems.Problems[i].Index < apiProblems.Problems[j].Index
 	})
@@ -81,6 +81,7 @@ func (d *DB) updateProblemTableIfNeeded(problems Problems) (err error) {
 		updateDate := time.Now()
 		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, problem_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(problem_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
 		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, problemKey, updateDate).Scan(&id)
+		problem.ID = id
 		if err != nil {
 			return err
 		}
