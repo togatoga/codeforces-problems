@@ -13,5 +13,7 @@ clean:
 	rm -f $(BINARY_NAME)
 run:
 	./server
+fmt:
+	$(GOFMT)
 test:
 	$(GOTEST)

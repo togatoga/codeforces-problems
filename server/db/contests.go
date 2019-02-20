@@ -25,7 +25,7 @@ type Contests struct {
 }
 
 func (d *DB) updateContestsIfNeeded() (err error) {
-	rows, err := d.Db.Query("SELECT COUNT(*) from problem")
+	rows, err := d.Db.Query("SELECT COUNT(*) from contest")
 	defer rows.Close()
 	if err != nil {
 		return err
