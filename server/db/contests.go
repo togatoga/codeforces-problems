@@ -65,6 +65,9 @@ func (d *DB) updateContestsIfNeeded() (err error) {
 	return nil
 }
 
+func (d *DB) UpdateContests(c echo.Context) (err error) {
+	return c.JSON(http.StatusOK, nil)
+}
 func (d *DB) Contests(c echo.Context) (err error) {
 	err = d.updateContestsIfNeeded()
 	if err != nil {

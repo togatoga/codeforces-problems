@@ -30,6 +30,7 @@ func main() {
 	//update data
 	e.PUT("api/v1/problems", db.UpdateProblems)
 	e.PUT("api/v1/submissions/:user", db.UpdateSubmissions)
+	e.PUT("api/v1/contests", db.UpdateContests)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
