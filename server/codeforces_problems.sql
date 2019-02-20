@@ -41,3 +41,12 @@ CREATE TABLE contest
     start_unix_time BIGINT,
     UNIQUE(contest_id)
 );
+
+DROP TABLE IF EXISTS api_hist_submissions;
+CREATE TABLE api_hist_submissions
+(
+    id SERIAL PRIMARY KEY,
+    user TEXT,
+    update_date TIMESTAMP
+    UNIQUE(user)
+);
