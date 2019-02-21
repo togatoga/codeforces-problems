@@ -1,21 +1,19 @@
 package db
 
 import (
-	"database/sql"
-	"fmt"
+	"github.com/go-pg/pg"
 )
 
 //DB represents a struct for
 type DB struct {
-	Db *sql.DB
+	Db *pg.DB
 }
 
 //NewDB returns an DB pointer to communicate with the database
-func NewDB(username, password, dbName string) (*DB, error) {
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", username, password, dbName)
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, err
-	}
-	return &DB{Db: db}, nil
+func NewDB(username, password, dbName string) *DB {
+	db := pg.Connect(&pg.Options{
+		User:     username,
+		Password: password,
+	})
+	return &DB{Db: db}
 }
