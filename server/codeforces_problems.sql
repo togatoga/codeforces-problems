@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS problem;
-CREATE TABLE problem
+DROP TABLE IF EXISTS problems;
+CREATE TABLE problems
 (
     id SERIAL PRIMARY KEY,
     contest_id INTEGER,
@@ -13,8 +13,8 @@ CREATE TABLE problem
     UNIQUE(problem_key),
     UNIQUE(contest_id, index)
 );
-DROP TABLE IF EXISTS submission;
-CREATE TABLE submission
+DROP TABLE IF EXISTS submissions;
+CREATE TABLE submissions
 (
     id SERIAL PRIMARY KEY,
     submission_id INTEGER,
@@ -28,8 +28,8 @@ CREATE TABLE submission
     UNIQUE(submission_id)
 );
 
-DROP TABLE IF EXISTS contest;
-CREATE TABLE contest
+DROP TABLE IF EXISTS contests;
+CREATE TABLE contests
 (
     id SERIAL PRIMARY KEY,
     contest_id INTEGER,
