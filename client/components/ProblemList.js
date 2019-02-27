@@ -32,6 +32,9 @@ export default class ProblemList extends React.Component {
     );
   }
   tagsFormatter(data) {
+    if (!Array.isArray(data)) {
+      return;
+    }
     const tags = data.map((tag, idx) => (
       <Badge key={idx} variant="info">
         {tag}

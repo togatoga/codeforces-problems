@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/labstack/echo"
 	"github.com/parnurzeal/gorequest"
 	"github.com/togatoga/goforces"
-
-	"github.com/labstack/echo"
 )
 
 type Submission struct {
@@ -24,10 +23,6 @@ type Submission struct {
 	ProblemKey          string `json:"problem_key"`
 }
 
-type Submissions struct {
-	Submissions []*Submission `json:"submissions"`
-}
-
 func parseUsers(users string) []string {
 	userList := strings.Split(users, ",")
 	result := []string{}
@@ -37,27 +32,6 @@ func parseUsers(users string) []string {
 		}
 	}
 	return result
-}
-
-func (d *DB) isNeededToUpdateSubmission(user string) (bool, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM submission WHERE handle = '%s'", user)
-	rows, err := d.Db.Query(query)
-	if err != nil {
-		return false, err
-	}
-	var count int
-	for rows.Next() {
-		err = rows.Scan(&count)
-		if err != nil {
-			return false, err
-		}
-	}
-	//Not empty
-	if count > 0 {
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func (d *DB) UpdateSubmissions(c echo.Context) (err error) {
@@ -71,7 +45,7 @@ func (d *DB) UpdateSubmissions(c echo.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	var submissions Submissions
+	var submissions []*Submission
 	for _, apiSubmission := range apiSubmissions {
 		s := new(Submission)
 		s.SubmissionID = apiSubmission.ID
@@ -82,16 +56,13 @@ func (d *DB) UpdateSubmissions(c echo.Context) (err error) {
 		s.ProgrammingLanguage = apiSubmission.ProgrammingLanguage
 		s.Verdict = apiSubmission.Verdict
 		s.ProblemKey = getProblemKey(apiSubmission.Problem.ContestID, apiSubmission.Problem.Index)
-		query := "INSERT INTO submission(submission_id, contest_id, index, handle, create_unix_time, programming_language, verdict, problem_key) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(submission_id) DO NOTHING RETURNING id"
-		rows, err := d.Db.Query(query, s.SubmissionID, s.ContestID, s.Index, s.Handle, s.CreateUnixTime, s.ProgrammingLanguage, s.Verdict, s.ProblemKey)
-		if rows.Next() {
-			rows.Close()
-		}
-		if err != nil {
-			return err
-		}
-		submissions.Submissions = append(submissions.Submissions, s)
+		submissions = append(submissions, s)
 	}
+	_, err = d.Db.Model(&submissions).OnConflict("(submission_id) DO NOTHING").Insert()
+	if err != nil {
+		return err
+	}
+
 	return c.JSON(http.StatusOK, submissions)
 }
 
@@ -100,46 +71,23 @@ func (d *DB) Submissions(c echo.Context) (err error) {
 	users := c.QueryParam("users")
 	userList := parseUsers(users)
 
-	var ss Submissions
+	var submissions []*Submission
 	for _, user := range userList {
-		//Check whether need to update submission db
-		isNeeded, err := d.isNeededToUpdateSubmission(user)
-		if err != nil {
-			c.Echo().Logger.Errorf(err.Error())
-			continue
-		}
-		if isNeeded {
+		go func() {
 			request := gorequest.New()
-			_, _, errs := request.Put(fmt.Sprintf("http://localhost:1323/api/v1/submissions/%s", user)).End()
+			//TODO Replace hard coded link with dynamic link depends on enviroments
+			_, _, err := request.Put(fmt.Sprintf("http://localhost:1323/api/v1/submissions/%s", user)).End()
 			if err != nil {
-				c.Echo().Logger.Error(errs)
+				c.Echo().Logger.Error(err)
 			}
-		} else {
-			go func() {
-				request := gorequest.New()
-				_, _, errs := request.Put(fmt.Sprintf("http://localhost:1323/api/v1/submissions/%s", user)).End()
-				if err != nil {
-					c.Echo().Logger.Error(errs)
-				}
-			}()
-		}
-
-		query := fmt.Sprintf("SELECT id, submission_id, handle, contest_id, index, create_unix_time, programming_language, verdict, problem_key FROM submission WHERE handle = '%s'", user)
-		rows, err := d.Db.Query(query)
-		defer rows.Close()
+		}()
+		var s []*Submission
+		err = d.Db.Model(&s).Where("handle = ?", user).Select()
 		if err != nil {
 			return err
 		}
-
-		for rows.Next() {
-			s := new(Submission)
-			err := rows.Scan(&s.ID, &s.SubmissionID, &s.Handle, &s.ContestID, &s.Index, &s.CreateUnixTime, &s.ProgrammingLanguage, &s.Verdict, &s.ProblemKey)
-			if err != nil {
-				return err
-			}
-			ss.Submissions = append(ss.Submissions, s)
-		}
+		submissions = append(submissions, s...)
 	}
 
-	return c.JSON(http.StatusOK, ss)
+	return c.JSON(http.StatusOK, submissions)
 }

@@ -11,7 +11,7 @@ import (
 
 type Contest struct {
 	ID              int    `json:"id"`
-	ContestID       int    `json:"contest_id"`
+	ContestID       int64  `json:"contest_id"`
 	Name            string `json:"name"`
 	Type            string `json:"type"`
 	Phase           string `json:"phase"`
@@ -20,27 +20,24 @@ type Contest struct {
 	StartUnixTime   int64  `json:"start_unix_time"`
 }
 
-type Contests struct {
-	Contests []*Contest `json:"contests"`
+func convertToContests(contestList []goforces.Contest) []*Contest {
+	var contests []*Contest
+	for _, c := range contestList {
+		contest := new(Contest)
+		contest.ContestID = c.ID
+		contest.Name = c.Name
+		contest.Type = c.Type
+		contest.Phase = c.Phase
+		contest.Frozen = c.Frozen
+		contest.DurationSeconds = c.DurationSeconds
+		contest.StartUnixTime = c.StartTimeSeconds
+
+		contests = append(contests, contest)
+	}
+	return contests
 }
 
-func (d *DB) updateContestsIfNeeded() (err error) {
-	rows, err := d.Db.Query("SELECT COUNT(*) from contest")
-	defer rows.Close()
-	if err != nil {
-		return err
-	}
-	var count int
-	for rows.Next() {
-		err := rows.Scan(&count)
-		if err != nil {
-			return err
-		}
-	}
-	//Not empty
-	if count > 0 {
-		return nil
-	}
+func (d *DB) UpdateContests(c echo.Context) (err error) {
 	api, err := goforces.NewClient(nil)
 	if err != nil {
 		return err
@@ -54,39 +51,20 @@ func (d *DB) updateContestsIfNeeded() (err error) {
 		return contestList[i].ID < contestList[j].ID
 	})
 
-	for _, c := range contestList {
-		var id int
-		query := "INSERT INTO contest(contest_id, name, type, phase, frozen, duration_seconds, start_unix_time) VALUES($1, $2, $3, $4, $5, $6, $7) ON CONFLICT(contest_id) DO UPDATE set phase = $4, frozen = $5 RETURNING id"
-		err = d.Db.QueryRow(query, c.ID, c.Name, c.Type, c.Phase, c.Frozen, c.DurationSeconds, c.StartTimeSeconds).Scan(&id)
-		if err != nil {
-			return err
-		}
+	contests := convertToContests(contestList)
+
+	_, err = d.Db.Model(&contests).OnConflict("(contest_id) DO UPDATE").Set("phase = EXCLUDED.phase").Set("frozen = EXCLUDED.frozen").Insert()
+	if err != nil {
+		return err
 	}
-	return nil
+	return c.JSON(http.StatusOK, contests)
 }
 
-func (d *DB) UpdateContests(c echo.Context) (err error) {
-	return c.JSON(http.StatusOK, nil)
-}
 func (d *DB) Contests(c echo.Context) (err error) {
-	err = d.updateContestsIfNeeded()
+	var contests []*Contest
+	err = d.Db.Model(&contests).Select()
 	if err != nil {
 		return err
 	}
-	rows, err := d.Db.Query("SELECT id, contest_id, name, type, phase, frozen, duration_seconds, start_unix_time FROM contest")
-	defer rows.Close()
-	if err != nil {
-		return err
-	}
-	var contests Contests
-	for rows.Next() {
-		contest := new(Contest)
-		err = rows.Scan(&contest.ID, &contest.ContestID, &contest.Name, &contest.Type, &contest.Phase, &contest.Frozen, &contest.DurationSeconds, &contest.StartUnixTime)
-		if err != nil {
-			return err
-		}
-		contests.Contests = append(contests.Contests, contest)
-	}
-
 	return c.JSON(http.StatusOK, contests)
 }

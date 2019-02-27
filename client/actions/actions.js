@@ -18,7 +18,7 @@ function requestProblems() {
 function receiveProblems(json) {
   return {
     type: RECEIVE_PROBLEMS,
-    problems: json.problems
+    problems: json !== null ? json : []
   };
 }
 
@@ -73,7 +73,7 @@ function requestContests() {
 function receiveContests(json) {
   return {
     type: RECEIVE_CONTESTS,
-    contests: json.contests
+    contests: json !== null ? json : []
   };
 }
 

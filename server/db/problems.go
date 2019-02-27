@@ -4,12 +4,9 @@ import (
 	"context"
 	"net/http"
 	"sort"
-	"time"
-
-	"github.com/lib/pq"
-	"github.com/togatoga/goforces"
 
 	"github.com/labstack/echo"
+	"github.com/togatoga/goforces"
 )
 
 //Problem represents a Codefoces problem
@@ -19,14 +16,9 @@ type Problem struct {
 	Name        string   `json:"name"`
 	Index       string   `json:"index"`
 	Points      float32  `json:"points"`
-	Tags        []string `json:"tags"`
+	Tags        []string `json:"tags" sql:",array"`
 	SolvedCount int      `json:"solved_count"`
 	ProblemKey  string   `json:"problem_key"`
-}
-
-//Problems represents Codeforces problems
-type Problems struct {
-	Problems []*Problem `json:"problems"`
 }
 
 func getMapContestIDToSolvedCnt(problemStatistics []goforces.ProblemStatistics) map[string]int {
@@ -41,7 +33,7 @@ func getMapContestIDToSolvedCnt(problemStatistics []goforces.ProblemStatistics) 
 	return mapContestIDToSolvedCnt
 }
 
-func converToProblems(apiProblems *goforces.Problems) (problems Problems) {
+func converToProblems(apiProblems *goforces.Problems) (problems []*Problem) {
 	mapContestIDToSolvedCnt := getMapContestIDToSolvedCnt(apiProblems.ProblemStatistics)
 	sort.Slice(apiProblems.Problems, func(i, j int) bool {
 		if apiProblems.Problems[i].ContestID != apiProblems.Problems[j].ContestID {
@@ -61,32 +53,9 @@ func converToProblems(apiProblems *goforces.Problems) (problems Problems) {
 		problem.ProblemKey = getProblemKey(apiProblem.ContestID, apiProblem.Index)
 		problem.SolvedCount = mapContestIDToSolvedCnt[problem.ProblemKey]
 
-		problems.Problems = append(problems.Problems, problem)
+		problems = append(problems, problem)
 	}
 	return problems
-}
-
-func (d *DB) updateProblemTableIfNeeded(problems Problems) (err error) {
-	for _, problem := range problems.Problems {
-		//INSERT
-		var id int
-		contestID := problem.ContestID
-		index := problem.Index
-		name := problem.Name
-		points := problem.Points
-		tags := problem.Tags
-		problemKey := problem.ProblemKey
-		solvedCnt := problem.SolvedCount
-
-		updateDate := time.Now()
-		query := "INSERT INTO problem(contest_id, name, index, points, tags, solved_count, problem_key, update_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT(problem_key) DO UPDATE SET tags = $5, solved_count = $6  RETURNING id"
-		err := d.Db.QueryRow(query, contestID, name, index, points, pq.Array(tags), solvedCnt, problemKey, updateDate).Scan(&id)
-		problem.ID = id
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (d *DB) UpdateProblems(c echo.Context) (err error) {
@@ -100,8 +69,8 @@ func (d *DB) UpdateProblems(c echo.Context) (err error) {
 		return err
 	}
 	problems := converToProblems(rawProblems)
-
-	if err = d.updateProblemTableIfNeeded(problems); err != nil {
+	_, err = d.Db.Model(&problems).OnConflict("(problem_key) DO UPDATE").Set("tags = EXCLUDED.tags").Set("solved_count = EXCLUDED.solved_count").Insert()
+	if err != nil {
 		return err
 	}
 
@@ -110,19 +79,10 @@ func (d *DB) UpdateProblems(c echo.Context) (err error) {
 
 //Problems returns json data for all problems from db
 func (d *DB) Problems(c echo.Context) (err error) {
-	rows, err := d.Db.Query("SELECT id, contest_id, name, index, points, tags, solved_count, problem_key FROM problem ORDER BY id DESC")
-	defer rows.Close()
+	var problems []*Problem
+	err = d.Db.Model(&problems).Order("id DESC").Select()
 	if err != nil {
 		return err
-	}
-	var problems Problems
-	for rows.Next() {
-		problem := new(Problem)
-		err := rows.Scan(&problem.ID, &problem.ContestID, &problem.Name, &problem.Index, &problem.Points, pq.Array(&problem.Tags), &problem.SolvedCount, &problem.ProblemKey)
-		if err != nil {
-			return err
-		}
-		problems.Problems = append(problems.Problems, problem)
 	}
 	return c.JSON(http.StatusOK, problems)
 }

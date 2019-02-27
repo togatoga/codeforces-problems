@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button } from "@material-ui/core";
 import { connect } from "react-redux";
 import { setFilters } from "../actions/actions";
 
@@ -23,8 +23,7 @@ class ComponentProblemFilter extends React.Component {
     return (
       <ButtonGroup>
         <Button
-          variant="outline-dark"
-          active={filters.not_solve}
+          variant="outlined"
           onClick={e => {
             e.preventDefault();
             filters.not_solve = !filters.not_solve;
@@ -34,8 +33,7 @@ class ComponentProblemFilter extends React.Component {
           Not Solve
         </Button>
         <Button
-          variant="outline-success"
-          active={filters.ac}
+          variant="outlined"
           onClick={e => {
             e.preventDefault();
             filters.ac = !filters.ac;
@@ -45,8 +43,7 @@ class ComponentProblemFilter extends React.Component {
           AC
         </Button>
         <Button
-          variant="outline-warning"
-          active={filters.rivals_ac}
+          variant="outlined"
           onClick={e => {
             e.preventDefault();
             filters.rivals_ac = !filters.rivals_ac;
@@ -56,8 +53,7 @@ class ComponentProblemFilter extends React.Component {
           Rivals AC
         </Button>
         <Button
-          variant="outline-danger"
-          active={filters.failed}
+          variant="outlined"
           onClick={e => {
             e.preventDefault();
             filters.failed = !filters.failed;

@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS problems;
-CREATE TABLE problems
+CREATE TABLE "problems"
 (
     id SERIAL PRIMARY KEY,
     contest_id INTEGER,

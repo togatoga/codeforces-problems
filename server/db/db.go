@@ -14,6 +14,7 @@ func NewDB(username, password, dbName string) *DB {
 	db := pg.Connect(&pg.Options{
 		User:     username,
 		Password: password,
+		Database: dbName,
 	})
 	return &DB{Db: db}
 }

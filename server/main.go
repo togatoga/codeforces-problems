@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	_ "github.com/lib/pq"
@@ -17,11 +15,9 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	db, err := db.NewDB("postgres", "postgres", "codeforces_problems")
+	db := db.NewDB("postgres", "postgres", "codeforces_problems")
 	defer db.Db.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	//from db
 	e.GET("api/v1/problems", db.Problems)
 	e.GET("api/v1/contests", db.Contests)
