@@ -76,7 +76,7 @@ func (d *DB) Submissions(c echo.Context) (err error) {
 		go func() {
 			request := gorequest.New()
 			//TODO Replace hard coded link with dynamic link depends on enviroments
-			_, _, err := request.Put(fmt.Sprintf("http://localhost:1323/api/v1/submissions/%s", user)).End()
+			_, _, err := request.Put(fmt.Sprintf(d.BaseURL+":"+d.Port+"/api/v1/submissions/%s", user)).End()
 			if err != nil {
 				c.Echo().Logger.Error(err)
 			}
