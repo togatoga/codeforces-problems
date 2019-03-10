@@ -55,8 +55,8 @@ export function fetchSubmissions(user, rivals) {
     return fetch(`http://localhost:1323/api/v1/submissions?users=${listUser}`)
       .then(response => response.json())
       .then(json => {
-        const userJSON = json.submissions.filter(item => item.handle === user);
-        const rivalsJSON = json.submissions.filter(
+        const userJSON = json.filter(item => item.handle === user);
+        const rivalsJSON = json.filter(
           item => item.handle !== user
         );
         dispatch(receiveSubmissions(userJSON, rivalsJSON));
