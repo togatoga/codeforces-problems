@@ -1,16 +1,16 @@
-server:
-  dev:
+development:
+  server:
     host: http://localhost
     port: "1323"
-  prod:
-    host: http://togatoga.net
-    port: "1323"
-db:
-  dev:
+  db:
     username: "postgres"
     password: "postgres"
     database: "codeforces_problems"
-  prod:
+production:
+  server:
+    host: http://togatoga.net
+    port: "1323"
+  db:
     username: "postgres"
     password: "postgres"
     database: "codeforces_problems"

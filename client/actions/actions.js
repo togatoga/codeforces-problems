@@ -25,7 +25,7 @@ function receiveProblems(json) {
 export function fetchProblems() {
   return dispatch => {
     dispatch(requestProblems());
-    return fetch("http://localhost:1323/api/v1/problems")
+    return fetch(`${API_URL}/api/v1/problems`)
       .then(response => response.json())
       .then(json => dispatch(receiveProblems(json)));
   };
@@ -52,13 +52,11 @@ export function fetchSubmissions(user, rivals) {
 
   return dispatch => {
     dispatch(requestSubmissions(user, rivals));
-    return fetch(`http://localhost:1323/api/v1/submissions?users=${listUser}`)
+    return fetch(`${API_URL}/api/v1/submissions?users=${listUser}`)
       .then(response => response.json())
       .then(json => {
         const userJSON = json.filter(item => item.handle === user);
-        const rivalsJSON = json.filter(
-          item => item.handle !== user
-        );
+        const rivalsJSON = json.filter(item => item.handle !== user);
         dispatch(receiveSubmissions(userJSON, rivalsJSON));
       });
   };
@@ -80,7 +78,7 @@ function receiveContests(json) {
 export function fetchContests() {
   return dispatch => {
     dispatch(requestContests());
-    return fetch("http://localhost:1323/api/v1/contests")
+    return fetch(`${API_URL}/api/v1/contests`)
       .then(response => {
         if (response.status >= 400) {
           throw new Error("Bad response from server");

@@ -34,12 +34,12 @@ func run() {
 	e.Use(middleware.Recover())
 	var env string
 	if production {
-		env = "prod"
+		env = "production"
 	} else {
-		env = "dev"
+		env = "development"
 	}
-	serverConfig := viper.GetStringMap("server")[env].(map[string]interface{})
-	dbConfig := viper.GetStringMap("db")[env].(map[string]interface{})
+	serverConfig := viper.GetStringMap(env)["server"].(map[string]interface{})
+	dbConfig := viper.GetStringMap(env)["db"].(map[string]interface{})
 	username := dbConfig["username"].(string)
 	password := dbConfig["password"].(string)
 	database := dbConfig["database"].(string)
