@@ -51,7 +51,6 @@ export default class ProblemList extends React.Component {
 
   render() {
     const { problems, user, rivals, filters } = this.props;
-
     const OKResult = user.filter(item => item.verdict === "OK");
     const WAResult = user.filter(
       item =>
@@ -60,30 +59,28 @@ export default class ProblemList extends React.Component {
     );
     const RivalOKResult = rivals.filter(item => item.verdict === "OK");
 
+    const filterAc = filters.includes("ac");
+    const filterFailed = filters.includes("failed");
+    const filterNotSolve = filters.includes("notSolve");
+    const filterRivalsAc = filters.includes("rivalsAc");
+
     const filteredProblems = problems.filter(problem => {
-      if (
-        !(
-          filters.ac ||
-          filters.failed ||
-          filters.not_solve ||
-          filters.rivals_ac
-        )
-      ) {
+      if (!(filterAc || filterFailed || filterNotSolve || filterRivalsAc)) {
         return true;
       }
 
-      if (filters.ac || filters.not_solve) {
+      if (filterAc || filterNotSolve) {
         const AC = OKResult.some(
           value => value.problem_key === problem.problem_key
         );
-        if (AC && filters.ac) {
+        if (AC && filterAc) {
           return true;
         }
-        if (!AC && filters.not_solve) {
+        if (!AC && filterNotSolve) {
           return true;
         }
       }
-      if (filters.failed) {
+      if (filterFailed) {
         const failed = WAResult.some(
           value => value.problem_key === problem.problem_key
         );
@@ -91,7 +88,7 @@ export default class ProblemList extends React.Component {
           return true;
         }
       }
-      if (filters.rivals_ac) {
+      if (filterRivalsAc) {
         const rivalsAC = RivalOKResult.some(
           value =>
             value.problem_key === problem.problem_key &&

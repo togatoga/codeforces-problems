@@ -1,68 +1,33 @@
 import React from "react";
-import { Button } from "@material-ui/core";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { connect } from "react-redux";
 import { setFilters } from "../actions/actions";
 
 class ComponentProblemFilter extends React.Component {
   constructor(props) {
     super(props);
-    this.handleClick = this.handleClick.bind(this);
+    this.handleChange = this.handleChange.bind(this);
 
     this.state = {
       filters: this.props.filters
     };
   }
 
-  handleClick(filters) {
+  handleChange(e, filters) {
+    e.preventDefault();
     this.setState({ filters: filters });
     this.props.setFilters(filters);
     this.props.updateState(this.state);
   }
   render() {
-    const { filters } = this.props;
+    const { filters } = this.state;
     return (
-      <ButtonGroup>
-        <Button
-          variant="outlined"
-          onClick={e => {
-            e.preventDefault();
-            filters.not_solve = !filters.not_solve;
-            this.handleClick(filters);
-          }}
-        >
-          Not Solve
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={e => {
-            e.preventDefault();
-            filters.ac = !filters.ac;
-            this.handleClick(filters);
-          }}
-        >
-          AC
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={e => {
-            e.preventDefault();
-            filters.rivals_ac = !filters.rivals_ac;
-            this.handleClick(filters);
-          }}
-        >
-          Rivals AC
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={e => {
-            e.preventDefault();
-            filters.failed = !filters.failed;
-            this.handleClick(filters);
-          }}
-        >
-          Failed
-        </Button>
-      </ButtonGroup>
+      <ToggleButtonGroup value={filters} onChange={this.handleChange}>
+        <ToggleButton value="notSolve">Not Solve</ToggleButton>
+        <ToggleButton value="ac">Accepted</ToggleButton>
+        <ToggleButton value="rivalsAc">Rivals Accepted</ToggleButton>
+        <ToggleButton value="failed">Failed</ToggleButton>
+      </ToggleButtonGroup>
     );
   }
 }

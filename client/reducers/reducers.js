@@ -42,12 +42,7 @@ function contestsByApi(state = { contests: [] }, action) {
 
 function filtersByUser(
   state = {
-    filters: {
-      not_solve: false,
-      ac: false,
-      rivals_ac: false,
-      failed: false
-    }
+    filters: []
   },
   action
 ) {
