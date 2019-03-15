@@ -1,45 +1,93 @@
 import React from "react";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
+import { ToggleButton, ToggleButtonGroup, Slider } from "@material-ui/lab";
 import { connect } from "react-redux";
 import { setFilters } from "../actions/actions";
+import {
+  FormControl,
+  Select,
+  Chip,
+  MenuItem,
+  InputLabel,
+  Grid
+} from "@material-ui/core";
 
-class ComponentProblemFilter extends React.Component {
+class ProblemFilter extends React.Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
-
-    this.state = {
-      filters: this.props.filters
-    };
   }
 
-  handleChange(e, filters) {
+  handleChange(e, statuses) {
     e.preventDefault();
-    this.setState({ filters: filters });
-    this.props.setFilters(filters);
-    this.props.updateState(this.state);
+    this.props.setFilters(
+      Object.assign({}, this.props.filters, {
+        statuses: statuses
+      })
+    );
   }
+
   render() {
-    const { filters } = this.state;
+    const { filters, visibility } = this.props;
+    const { statuses, tags, selectedTags } = filters;
+
     return (
-      <ToggleButtonGroup value={filters} onChange={this.handleChange}>
-        <ToggleButton value="notSolve">Not Solve</ToggleButton>
-        <ToggleButton value="ac">Accepted</ToggleButton>
-        <ToggleButton value="rivalsAc">Rivals Accepted</ToggleButton>
-        <ToggleButton value="failed">Failed</ToggleButton>
-      </ToggleButtonGroup>
+      <Grid container>
+        <Grid container>
+          {visibility.tags && (
+            <Grid item xs={4}>
+              <FormControl fullWidth={true}>
+                <InputLabel>Problem Tag</InputLabel>
+                <Select
+                  multiple
+                  value={selectedTags}
+                  onChange={e => {
+                    var filters = this.props.filters;
+                    filters.selectedTags = e.target.value;
+                    this.props.setFilters(this.props.filters);
+                  }}
+                  renderValue={selected => (
+                    <div>
+                      {selected.map(value => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </div>
+                  )}
+                >
+                  {tags.map(tag => (
+                    <MenuItem key={tag} value={tag}>
+                      {tag}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          <ToggleButtonGroup value={statuses} onChange={this.handleChange}>
+            <ToggleButton value="notSolve">Not Solve</ToggleButton>
+            <ToggleButton value="ac">Accepted</ToggleButton>
+            <ToggleButton value="rivalsAc">Rivals Accepted</ToggleButton>
+            <ToggleButton value="failed">Failed</ToggleButton>
+          </ToggleButtonGroup>
+        </Grid>
+      </Grid>
     );
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapStateToProps(state) {
   return {
-    setFilters: filters => dispatch(setFilters(filters))
+    filters: state.filtersByUser.filters,
+    visibility: state.visibilityByUser.visibility
   };
 }
-const ProblemFilter = connect(
-  null,
+function mapDispatchToProps(dispatch) {
+  return {
+    setFilters: values => dispatch(setFilters(values))
+  };
+}
+export default connect(
+  mapStateToProps,
   mapDispatchToProps
-)(ComponentProblemFilter);
-
-export default ProblemFilter;
+)(ProblemFilter);

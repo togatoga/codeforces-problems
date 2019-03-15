@@ -3,8 +3,10 @@ import {
   RECEIVE_PROBLEMS,
   RECEIVE_SUBMISSIONS,
   RECEIVE_CONTESTS,
-  RECEIVE_FILTERS
+  RECEIVE_FILTERS,
+  RECEIVE_VISIBILITY
 } from "../actions/actions";
+import { defaultCipherList } from "constants";
 
 function problemsByApi(state = { problems: [] }, action) {
   switch (action.type) {
@@ -42,7 +44,12 @@ function contestsByApi(state = { contests: [] }, action) {
 
 function filtersByUser(
   state = {
-    filters: []
+    filters: {
+      statuses: [],
+      solvedCount: 0,
+      tags: ["dp", "math"],
+      selectedTags: []
+    }
   },
   action
 ) {
@@ -55,12 +62,31 @@ function filtersByUser(
       return state;
   }
 }
+function visibilityByUser(
+  state = {
+    visibility: {
+      solvedCount: false,
+      tags: false
+    }
+  },
+  action
+) {
+  switch (action.type) {
+    case RECEIVE_VISIBILITY:
+      return Object.assign({}, state, {
+        visibility: action.visibility
+      });
+    default:
+      return state;
+  }
+}
 
 const rootReducer = combineReducers({
   problemsByApi,
   usersByApi,
   contestsByApi,
-  filtersByUser
+  filtersByUser,
+  visibilityByUser
 });
 
 export default rootReducer;

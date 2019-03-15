@@ -8,6 +8,7 @@ export const REQUEST_CONTESTS = "REQUEST_CONTESTS";
 export const RECEIVE_CONTESTS = "RECIEVE_CONTESTS";
 export const SET_FILTERS = "SET_FILTERS";
 export const RECEIVE_FILTERS = "RECIEVE_FILTERS";
+export const RECEIVE_VISIBILITY = "RECIEVE_VISIBILITY";
 
 function requestProblems() {
   return {
@@ -99,5 +100,18 @@ function receiveFilters(filters) {
 export function setFilters(filters) {
   return dispatch => {
     return dispatch(receiveFilters(filters));
+  };
+}
+
+function receiveVisibility(visibility) {
+  return {
+    type: RECEIVE_VISIBILITY,
+    visibility: visibility
+  };
+}
+
+export function setVisibility(visibility) {
+  return dispatch => {
+    return dispatch(receiveVisibility(visibility));
   };
 }

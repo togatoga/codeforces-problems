@@ -2,17 +2,22 @@ import React from "react";
 import { Badge } from "react-bootstrap";
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 import ProblemFilter from "./ProblemFilter";
+import VisibilitySetting from "./VisibilitySetting";
+import { Grid } from "@material-ui/core";
+import { connect } from "react-redux";
 
-export default class ProblemList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.updateState = this.updateState.bind(this);
-    const { contests } = this.props;
-    this.mapContestIdToName = contests.reduce(function(map, obj) {
-      map[obj.contest_id] = obj.name;
-      return map;
-    }, {});
-  }
+class ProblemList extends React.Component {
+  // constructor(props) {
+  //   super(props);
+  //   this.updateState = this.updateState.bind(this);
+  //   const { contests } = this.props;
+
+  //   this.mapContestIdToName = contests.reduce(function(map, obj) {
+  //     map[obj.contest_id] = obj.name;
+  //     return map;
+  //   }, {});
+  // }
+
   nameFormatter(name, row) {
     const { contest_id, index } = row;
     const url = `http://codeforces.com/problemset/problem/${contest_id}/${index}`;
@@ -45,12 +50,20 @@ export default class ProblemList extends React.Component {
   solvedCountFormatter(solved_count) {
     return <div>{solved_count}</div>;
   }
-  updateState(state) {
-    this.setState(state);
-  }
 
   render() {
-    const { problems, user, rivals, filters } = this.props;
+    const {
+      problems,
+      contests,
+      user,
+      rivals,
+      filters,
+      visibility
+    } = this.props;
+    const mapContestIdToName = contests.reduce(function(map, obj) {
+      map[obj.contest_id] = obj.name;
+      return map;
+    }, {});
     const OKResult = user.filter(item => item.verdict === "OK");
     const WAResult = user.filter(
       item =>
@@ -59,10 +72,10 @@ export default class ProblemList extends React.Component {
     );
     const RivalOKResult = rivals.filter(item => item.verdict === "OK");
 
-    const filterAc = filters.includes("ac");
-    const filterFailed = filters.includes("failed");
-    const filterNotSolve = filters.includes("notSolve");
-    const filterRivalsAc = filters.includes("rivalsAc");
+    const filterAc = filters.statuses.includes("ac");
+    const filterFailed = filters.statuses.includes("failed");
+    const filterNotSolve = filters.statuses.includes("notSolve");
+    const filterRivalsAc = filters.statuses.includes("rivalsAc");
 
     const filteredProblems = problems.filter(problem => {
       if (!(filterAc || filterFailed || filterNotSolve || filterRivalsAc)) {
@@ -103,71 +116,112 @@ export default class ProblemList extends React.Component {
     });
 
     return (
-      <div>
-        <ProblemFilter filters={filters} updateState={this.updateState} />
-        <BootstrapTable
-          data={filteredProblems}
-          striped={true}
-          hover={true}
-          trClassName={row => {
-            const OK = OKResult.some(
-              value =>
-                value.contest_id == row.contest_id && value.index === row.index
-            );
-            const WA = WAResult.some(
-              value =>
-                value.contest_id === row.contest_id && value.index === row.index
-            );
-            const rivalOK = RivalOKResult.some(
-              value =>
-                value.contest_id === row.contest_id && value.index === row.index
-            );
-            if (OK) {
-              return "table-success";
-            } else if (WA) {
-              return "table-warning";
-            } else if (rivalOK) {
-              return "table-danger";
-            }
-            return "";
-          }}
-        >
-          <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
-
-          <TableHeaderColumn
-            dataField="contest_id"
-            dataFormat={contest_id => {
-              const url = `http://codeforces.com/contest/${contest_id}`;
-              return (
-                <a href={url} target="_blank">
-                  {this.mapContestIdToName[contest_id] || "No Name"}
-                </a>
+      <Grid container>
+        <Grid item xs={12}>
+          <VisibilitySetting />
+        </Grid>
+        <Grid item xs={12}>
+          <ProblemFilter />
+        </Grid>
+        <Grid item xs={12}>
+          <BootstrapTable
+            data={filteredProblems}
+            striped={true}
+            hover={true}
+            trClassName={row => {
+              const OK = OKResult.some(
+                value =>
+                  value.contest_id == row.contest_id &&
+                  value.index === row.index
               );
+              const WA = WAResult.some(
+                value =>
+                  value.contest_id === row.contest_id &&
+                  value.index === row.index
+              );
+              const rivalOK = RivalOKResult.some(
+                value =>
+                  value.contest_id === row.contest_id &&
+                  value.index === row.index
+              );
+              if (OK) {
+                return "table-success";
+              } else if (WA) {
+                return "table-warning";
+              } else if (rivalOK) {
+                return "table-danger";
+              }
+              return "";
             }}
-            width="30%"
-            dataSort={true}
           >
-            Contest ID
-          </TableHeaderColumn>
+            <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
 
-          <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
-            Problem
-          </TableHeaderColumn>
-          <TableHeaderColumn
-            dataField="solved_count"
-            dataSort={true}
-            width="10%"
-            dataFromat={this.solvedCountFormatter}
-          >
-            Solved
-          </TableHeaderColumn>
+            <TableHeaderColumn
+              dataField="contest_id"
+              dataFormat={contest_id => {
+                const url = `http://codeforces.com/contest/${contest_id}`;
+                return (
+                  <a href={url} target="_blank">
+                    {mapContestIdToName[contest_id] || "No Name"}
+                  </a>
+                );
+              }}
+              width="30%"
+              dataSort={true}
+            >
+              Contest ID
+            </TableHeaderColumn>
 
-          {/* <TableHeaderColumn>Last Submit Date</TableHeaderColumn> */}
-          <TableHeaderColumn dataField="tags" dataFormat={this.tagsFormatter}>
-            Tags
-          </TableHeaderColumn>
-        </BootstrapTable>
-      </div>
+            <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
+              Problem
+            </TableHeaderColumn>
+            {visibility.solvedCount && (
+              <TableHeaderColumn
+                dataField="solved_count"
+                dataSort={true}
+                width="10%"
+                dataFromat={this.solvedCountFormatter}
+              >
+                Solved
+              </TableHeaderColumn>
+            )}
+            {visibility.tags && (
+              <TableHeaderColumn
+                dataField="tags"
+                dataFormat={this.tagsFormatter}
+              >
+                Tags
+              </TableHeaderColumn>
+            )}
+          </BootstrapTable>
+        </Grid>
+      </Grid>
     );
   }
 }
+
+function mapStateToProps(state) {
+  const {
+    problemsByApi,
+    contestsByApi,
+    usersByApi,
+    filtersByUser,
+    visibilityByUser
+  } = state;
+  const { problems } = problemsByApi;
+  const { contests } = contestsByApi;
+  const { user, rivals } = usersByApi;
+
+  const { filters } = filtersByUser;
+  const { visibility } = visibilityByUser;
+  return {
+    problems,
+    contests,
+    user,
+    rivals,
+    filters,
+    visibility
+  };
+}
+
+export default connect(mapStateToProps)(ProblemList);
