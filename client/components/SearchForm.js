@@ -39,44 +39,11 @@ class ComponentSearchForm extends React.Component {
               this.setState({ rivals: e.target.value });
             }}
           />
-          <Button type="submit" variant="contained">
+          <Button type="submit" color="primary">
             Search
           </Button>
         </FormControl>
       </form>
-      // <Form onSubmit={e => this.handleSubmit(e)}>
-      //   <Form.Row>
-      //     <FormGroup as={Col} md="6">
-      //       <FormLabel>User</FormLabel>
-      //       <FormControl
-      //         type="text"
-      //         placeholder="tourist"
-      //         name="user"
-      //         value={this.props.user}
-      //         onChange={e => {
-      //           e.preventDefault();
-      //           this.state.user = e.target.value;
-      //         }}
-      //       />
-      //     </FormGroup>
-      //     <FormGroup as={Col} md="6">
-      //       <FormLabel>Rivals</FormLabel>
-      //       <FormControl
-      //         type="text"
-      //         placeholder="chokudai,snuke"
-      //         name="rivals"
-      //         value={this.props.rivals}
-      //         onChange={e => {
-      //           e.preventDefault();
-      //           this.state.rivals = e.target.value;
-      //         }}
-      //       />
-      //     </FormGroup>
-      //   </Form.Row>
-      //   <FormGroup>
-      //     <Button type="submit">Search</Button>
-      //   </FormGroup>
-      // </Form>
     );
   }
 }
