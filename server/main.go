@@ -86,6 +86,9 @@ func run() {
 	database := dbConfig["database"].(string)
 	baseURL := serverConfig["host"].(string)
 	port := serverConfig["port"].(string)
+	if !production {
+		baseURL += ":" + port
+	}
 	db := db.NewDB(username, password, database, baseURL, port)
 	defer db.Db.Close()
 
