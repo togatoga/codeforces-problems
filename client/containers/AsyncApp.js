@@ -15,7 +15,9 @@ class AsyncApp extends Component {
   render() {
     return (
       <div>
-        <NavigationBar />
+        <Grid container>
+          <NavigationBar />
+        </Grid>
         <Grid container>
           <Grid item xs={12}>
             <SearchForm />

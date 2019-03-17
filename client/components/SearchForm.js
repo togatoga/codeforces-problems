@@ -1,10 +1,18 @@
 import React from "react";
+import { compose } from "redux";
 import { connect } from "react-redux";
-import { FormControl, TextField } from "@material-ui/core";
+import { TextField, Button, Grid } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 import { fetchSubmissions } from "../actions/actions";
-import { Button, Input } from "react-bootstrap";
 
-class ComponentSearchForm extends React.Component {
+const styles = theme => ({
+  container: {
+    padding: "10px",
+    display: "flex"
+  }
+});
+
+class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -16,33 +24,32 @@ class ComponentSearchForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-
     this.props.fetchSubmissions(this.state.user, this.state.rivals);
   }
+
   render() {
+    const { classes } = this.props;
     return (
-      <form onSubmit={e => this.handleSubmit(e)}>
-        <FormControl>
-          <TextField
-            label="user"
-            value={this.state.user}
-            variant="outlined"
-            onChange={e => {
-              this.setState({ user: e.target.value });
-            }}
-          />
-          <TextField
-            label="rivals"
-            value={this.state.rivals}
-            variant="outlined"
-            onChange={e => {
-              this.setState({ rivals: e.target.value });
-            }}
-          />
-          <Button type="submit" color="primary">
-            Search
-          </Button>
-        </FormControl>
+      <form onSubmit={e => this.handleSubmit(e)} className={classes.container}>
+        <TextField
+          label="user"
+          value={this.state.user}
+          variant="outlined"
+          onChange={e => {
+            this.setState({ user: e.target.value });
+          }}
+        />
+        <TextField
+          label="rivals"
+          value={this.state.rivals}
+          variant="outlined"
+          onChange={e => {
+            this.setState({ rivals: e.target.value });
+          }}
+        />{" "}
+        <Button type="submit" variant="contained">
+          Search
+        </Button>
       </form>
     );
   }
@@ -56,9 +63,10 @@ function mapDispatchToProps(dispatch) {
     fetchSubmissions: (user, rivals) => dispatch(fetchSubmissions(user, rivals))
   };
 }
-const SearchForm = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ComponentSearchForm);
-
-export default SearchForm;
+export default compose(
+  withStyles(styles),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )
+)(SearchForm);
