@@ -78,6 +78,20 @@ class ProblemList extends React.Component {
     const filterRivalsAc = filters.statuses.includes("rivalsAc");
 
     const filteredProblems = problems.filter(problem => {
+      if (filters.selectedTags.length > 0) {
+        if (problem.tags === null) {
+          return false;
+        }
+        if (
+          !problem.tags.some(function(tag) {
+            return filters.selectedTags.some(
+              selectedTag => selectedTag === tag
+            );
+          })
+        ) {
+          return false;
+        }
+      }
       if (!(filterAc || filterFailed || filterNotSolve || filterRivalsAc)) {
         return true;
       }
@@ -115,13 +129,19 @@ class ProblemList extends React.Component {
       return false;
     });
 
+    const filteredTags = filteredProblems
+      .map(problem => {
+        return problem.tags;
+      })
+      .flat();
+
     return (
       <Grid container>
         <Grid item xs={12}>
           <VisibilitySetting />
         </Grid>
         <Grid item xs={12}>
-          <ProblemFilter />
+          <ProblemFilter tags={filteredTags} />
         </Grid>
         <Grid item xs={12}>
           <BootstrapTable

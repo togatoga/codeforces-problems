@@ -27,8 +27,8 @@ class ProblemFilter extends React.Component {
   }
 
   render() {
-    const { filters, visibility } = this.props;
-    const { statuses, tags, selectedTags } = filters;
+    const { filters, visibility, tags } = this.props;
+    const { statuses, selectedTags } = filters;
 
     return (
       <Grid container>
@@ -41,9 +41,11 @@ class ProblemFilter extends React.Component {
                   multiple
                   value={selectedTags}
                   onChange={e => {
-                    var filters = this.props.filters;
-                    filters.selectedTags = e.target.value;
-                    this.props.setFilters(this.props.filters);
+                    this.props.setFilters(
+                      Object.assign({}, this.props.filters, {
+                        selectedTags: e.target.value
+                      })
+                    );
                   }}
                   renderValue={selected => (
                     <div>
@@ -53,11 +55,15 @@ class ProblemFilter extends React.Component {
                     </div>
                   )}
                 >
-                  {tags.map(tag => (
-                    <MenuItem key={tag} value={tag}>
-                      {tag}
-                    </MenuItem>
-                  ))}
+                  {tags
+                    .filter((x, i, self) => {
+                      return x !== null && self.indexOf(x) === i;
+                    })
+                    .map(tag => (
+                      <MenuItem key={tag} value={tag}>
+                        {tag}
+                      </MenuItem>
+                    ))}
                 </Select>
               </FormControl>
             </Grid>
