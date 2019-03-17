@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "NODE_ENV=development webpack",
-    "prod": "NODE_ENV=production webpack"
+    "prod": "NODE_ENV=production webpack --optimize-minimize"
   },
   "author": "togatoga",
   "license": "MIT",
