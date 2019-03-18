@@ -5,19 +5,9 @@ import ProblemFilter from "./ProblemFilter";
 import VisibilitySetting from "./VisibilitySetting";
 import { Grid } from "@material-ui/core";
 import { connect } from "react-redux";
+import { createSelector } from "reselect";
 
 class ProblemList extends React.Component {
-  // constructor(props) {
-  //   super(props);
-  //   this.updateState = this.updateState.bind(this);
-  //   const { contests } = this.props;
-
-  //   this.mapContestIdToName = contests.reduce(function(map, obj) {
-  //     map[obj.contest_id] = obj.name;
-  //     return map;
-  //   }, {});
-  // }
-
   nameFormatter(name, row) {
     const { contest_id, index } = row;
     const url = `http://codeforces.com/problemset/problem/${contest_id}/${index}`;
@@ -52,84 +42,13 @@ class ProblemList extends React.Component {
   }
 
   render() {
-    const {
-      problems,
-      contests,
-      user,
-      rivals,
-      filters,
-      visibility
-    } = this.props;
+    const { problems, contests, userStatus, visibility } = this.props;
     const mapContestIdToName = contests.reduce(function(map, obj) {
       map[obj.contest_id] = obj.name;
       return map;
     }, {});
-    const OKResult = user.filter(item => item.verdict === "OK");
-    const WAResult = user.filter(
-      item =>
-        item.verdict !== "OK" &&
-        !OKResult.some(value => value.problem_key === item.problem_key)
-    );
-    const RivalOKResult = rivals.filter(item => item.verdict === "OK");
 
-    const filterAc = filters.statuses.includes("ac");
-    const filterFailed = filters.statuses.includes("failed");
-    const filterNotSolve = filters.statuses.includes("notSolve");
-    const filterRivalsAc = filters.statuses.includes("rivalsAc");
-
-    const filteredProblems = problems.filter(problem => {
-      if (filters.selectedTags.length > 0) {
-        if (problem.tags === null) {
-          return false;
-        }
-        if (
-          !problem.tags.some(function(tag) {
-            return filters.selectedTags.some(
-              selectedTag => selectedTag === tag
-            );
-          })
-        ) {
-          return false;
-        }
-      }
-      if (!(filterAc || filterFailed || filterNotSolve || filterRivalsAc)) {
-        return true;
-      }
-
-      if (filterAc || filterNotSolve) {
-        const AC = OKResult.some(
-          value => value.problem_key === problem.problem_key
-        );
-        if (AC && filterAc) {
-          return true;
-        }
-        if (!AC && filterNotSolve) {
-          return true;
-        }
-      }
-      if (filterFailed) {
-        const failed = WAResult.some(
-          value => value.problem_key === problem.problem_key
-        );
-        if (failed) {
-          return true;
-        }
-      }
-      if (filterRivalsAc) {
-        const rivalsAC = RivalOKResult.some(
-          value =>
-            value.problem_key === problem.problem_key &&
-            !OKResult.some(user => user.problem_key === value.problem_key)
-        );
-        if (rivalsAC) {
-          return true;
-        }
-      }
-
-      return false;
-    });
-
-    const filteredTags = filteredProblems
+    const tags = problems
       .map(problem => {
         return problem.tags;
       })
@@ -141,25 +60,25 @@ class ProblemList extends React.Component {
           <VisibilitySetting />
         </Grid>
         <Grid item xs={12}>
-          <ProblemFilter tags={filteredTags} />
+          <ProblemFilter tags={tags} />
         </Grid>
         <Grid item xs={12}>
           <BootstrapTable
-            data={filteredProblems}
+            data={problems}
             striped={true}
             hover={true}
             trClassName={row => {
-              const OK = OKResult.some(
+              const OK = userStatus.user.ac.some(
                 value =>
                   value.contest_id == row.contest_id &&
                   value.index === row.index
               );
-              const WA = WAResult.some(
+              const WA = userStatus.user.wa.some(
                 value =>
                   value.contest_id === row.contest_id &&
                   value.index === row.index
               );
-              const rivalOK = RivalOKResult.some(
+              const rivalOK = userStatus.rivals.ac.some(
                 value =>
                   value.contest_id === row.contest_id &&
                   value.index === row.index
@@ -220,26 +139,106 @@ class ProblemList extends React.Component {
   }
 }
 
-function mapStateToProps(state) {
-  const {
-    problemsByApi,
-    contestsByApi,
-    usersByApi,
-    filtersByUser,
-    visibilityByUser
-  } = state;
-  const { problems } = problemsByApi;
-  const { contests } = contestsByApi;
-  const { user, rivals } = usersByApi;
+const problemsSelector = state => state.problemsByApi.problems;
+const filtersSelector = state => state.filtersByUser.filters;
+const userSelector = state => state.usersByApi.user;
+const rivalsSelector = state => state.usersByApi.rivals;
 
-  const { filters } = filtersByUser;
+export const userStatusSelector = createSelector(
+  [userSelector, rivalsSelector],
+  (user, rivals) => {
+    const userACStatus = user.filter(item => item.verdict === "OK");
+    const userWAStatus = user.filter(
+      item =>
+        item.verdict !== "OK" &&
+        !userACStatus.some(value => value.problem_key == item.problem_key)
+    );
+    const rivalsACStatus = rivals.filter(item => item.verdict === "OK");
+    return {
+      user: {
+        ac: userACStatus,
+        wa: userWAStatus
+      },
+      rivals: {
+        ac: rivalsACStatus
+      }
+    };
+  }
+);
+
+export const filteredProblemsSelector = createSelector(
+  [problemsSelector, filtersSelector, userStatusSelector],
+  (problems, filters, userStatus) => {
+    const filterAc = filters.statuses.includes("ac");
+    const filterFailed = filters.statuses.includes("failed");
+    const filterNotSolve = filters.statuses.includes("notSolve");
+    const filterRivalsAc = filters.statuses.includes("rivalsAc");
+    return problems.filter(problem => {
+      //Tag
+      if (filters.selectedTags.length > 0) {
+        if (problem.tags === null) {
+          return false;
+        }
+        if (
+          !problem.tags.some(function(tag) {
+            return filters.selectedTags.some(
+              selectedTag => selectedTag === tag
+            );
+          })
+        ) {
+          return false;
+        }
+      }
+      if (!(filterAc || filterFailed || filterNotSolve || filterRivalsAc)) {
+        return true;
+      }
+
+      if (filterAc || filterNotSolve) {
+        const AC = userStatus.user.ac.some(
+          value => value.problem_key === problem.problem_key
+        );
+        if (AC && filterAc) {
+          return true;
+        }
+        if (!AC && filterNotSolve) {
+          return true;
+        }
+      }
+      if (filterFailed) {
+        const failed = userStatus.user.wa.some(
+          value => value.problem_key === problem.problem_key
+        );
+        if (failed) {
+          return true;
+        }
+      }
+      if (filterRivalsAc) {
+        const rivalsAC = userStatus.rivals.ac.some(
+          value =>
+            value.problem_key === problem.problem_key &&
+            !userStatus.user.ac.some(
+              user => user.problem_key === value.problem_key
+            )
+        );
+        if (rivalsAC) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }
+);
+
+function mapStateToProps(state) {
+  const { contestsByApi, visibilityByUser } = state;
+  const { contests } = contestsByApi;
   const { visibility } = visibilityByUser;
   return {
-    problems,
+    problems: filteredProblemsSelector(state),
     contests,
-    user,
-    rivals,
-    filters,
+    userStatus: userStatusSelector(state),
+    filters: filtersSelector(state),
     visibility
   };
 }
