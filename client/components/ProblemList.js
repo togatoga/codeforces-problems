@@ -48,10 +48,7 @@ class ProblemList extends React.Component {
 
     const options = {
       rowsPerPage: 50,
-      selectableRows: false,
-      renderExpandableRow: function(rowData, rowMeta) {
-        return <div>Hello World</div>;
-      }
+      selectableRows: false
     };
 
     const coloredProblems = problems.map(problem => {
@@ -139,6 +136,14 @@ class ProblemList extends React.Component {
       {
         name: "points",
         label: "Point",
+        options: {
+          filter: true,
+          sort: true
+        }
+      },
+      {
+        name: "solved_count",
+        label: "Solvers",
         options: {
           filter: true,
           sort: true,
