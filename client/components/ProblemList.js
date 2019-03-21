@@ -1,44 +1,42 @@
 import React from "react";
-import { Badge } from "react-bootstrap";
-import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 import ProblemFilter from "./ProblemFilter";
 import VisibilitySetting from "./VisibilitySetting";
-import { Grid } from "@material-ui/core";
+import { Grid, Paper, Chip, Link, InputLabel } from "@material-ui/core";
+import { Badge } from "react-bootstrap";
+import MUIDataTable from "mui-datatables";
 import { connect } from "react-redux";
 import { createSelector } from "reselect";
 
 class ProblemList extends React.Component {
-  nameFormatter(name, row) {
-    const { contest_id, index } = row;
+  nameFormatter(name, contest_id, index) {
     const url = `http://codeforces.com/problemset/problem/${contest_id}/${index}`;
 
     return (
-      <a href={url} target="_blank">
+      <Link href={url} target="_blank">
         {index}. {name}
-      </a>
+      </Link>
     );
   }
-  contestFormatter(contest_id) {
+  contestFormatter(contest_id, mapContestIdToName) {
     const url = `http://codeforces.com/contest/${contest_id}`;
     return (
       <a href={url} target="_blank">
-        {contest_id}
+        {mapContestIdToName[contest_id] || "No Name"}
       </a>
     );
   }
-  tagsFormatter(data) {
-    if (!Array.isArray(data)) {
-      return;
+  tagsFormatter(tags) {
+    if (tags === null || !Array.isArray(tags)) {
+      return <div />;
     }
-    const tags = data.map((tag, idx) => (
-      <Badge key={idx} variant="info">
-        {tag}
-      </Badge>
-    ));
-    return <div>{tags}</div>;
-  }
-  solvedCountFormatter(solved_count) {
-    return <div>{solved_count}</div>;
+
+    return (
+      <div>
+        {tags.map(tag => (
+          <Chip key={tag} label={tag} />
+        ))}
+      </div>
+    );
   }
 
   render() {
@@ -48,6 +46,117 @@ class ProblemList extends React.Component {
       return map;
     }, {});
 
+    const options = {
+      rowsPerPage: 50,
+      selectableRows: false,
+      renderExpandableRow: function(rowData, rowMeta) {
+        return <div>Hello World</div>;
+      }
+    };
+
+    const coloredProblems = problems.map(problem => {
+      if (
+        userStatus.user.ac.some(
+          value => value.problem_key === problem.problem_key
+        )
+      ) {
+        problem.status = "AC";
+        return problem;
+      }
+      if (
+        userStatus.user.wa.some(
+          value => value.problem_key === problem.problem_key
+        )
+      ) {
+        problem.status = "Failed";
+        return problem;
+      }
+      if (
+        userStatus.rivals.ac.some(
+          value => value.problem_key === problem.problem_key
+        )
+      ) {
+        problem.status = "RivalAC";
+        return problem;
+      }
+      problem.status = "";
+      return problem;
+    });
+
+    const columns = [
+      {
+        name: "contest_id",
+        label: "Contest",
+        options: {
+          customBodyRender: value => {
+            return this.contestFormatter(value, mapContestIdToName);
+          },
+          filter: true,
+          sort: true
+        }
+      },
+      {
+        name: "name",
+        label: "Problem",
+        options: {
+          customBodyRender: (value, tableMeta) => {
+            const { contest_id, index } = problems[tableMeta.rowIndex];
+            return this.nameFormatter(value, contest_id, index);
+          },
+          filter: false,
+          sort: false,
+          display: "true"
+        }
+      },
+      {
+        name: "status",
+        label: "Status",
+        options: {
+          customBodyRender: value => {
+            if (value === "") {
+              return <div />;
+            }
+            var color = "";
+            if (value === "AC") {
+              color = "success";
+            } else if (value === "Failed") {
+              color = "warning";
+            } else if (value === "RivalAC") {
+              color = "danger";
+            }
+            return (
+              <div>
+                <h5>
+                  <Badge variant={color}>{value}</Badge>
+                </h5>
+              </div>
+            );
+          },
+          filter: false,
+          sort: true
+        }
+      },
+      {
+        name: "points",
+        label: "Point",
+        options: {
+          filter: true,
+          sort: true,
+          display: visibility.solvedCount
+        }
+      },
+      {
+        name: "tags",
+        label: "Tags",
+        options: {
+          customBodyRender: value => {
+            return this.tagsFormatter(value);
+          },
+          filter: false,
+          display: visibility.tags
+        }
+      }
+    ];
     const tags = problems
       .map(problem => {
         return problem.tags;
@@ -63,76 +172,16 @@ class ProblemList extends React.Component {
           <ProblemFilter tags={tags} />
         </Grid>
         <Grid item xs={12}>
-          <BootstrapTable
-            data={problems}
-            striped={true}
-            hover={true}
-            trClassName={row => {
-              const OK = userStatus.user.ac.some(
-                value =>
-                  value.contest_id == row.contest_id &&
-                  value.index === row.index
-              );
-              const WA = userStatus.user.wa.some(
-                value =>
-                  value.contest_id === row.contest_id &&
-                  value.index === row.index
-              );
-              const rivalOK = userStatus.rivals.ac.some(
-                value =>
-                  value.contest_id === row.contest_id &&
-                  value.index === row.index
-              );
-              if (OK) {
-                return "table-success";
-              } else if (WA) {
-                return "table-warning";
-              } else if (rivalOK) {
-                return "table-danger";
-              }
-              return "";
-            }}
-          >
-            <TableHeaderColumn dataField="id" isKey={true} hidden={true} />
-
-            <TableHeaderColumn
-              dataField="contest_id"
-              dataFormat={contest_id => {
-                const url = `http://codeforces.com/contest/${contest_id}`;
-                return (
-                  <a href={url} target="_blank">
-                    {mapContestIdToName[contest_id] || "No Name"}
-                  </a>
-                );
-              }}
-              width="30%"
-              dataSort={true}
-            >
-              Contest ID
-            </TableHeaderColumn>
-
-            <TableHeaderColumn dataField="name" dataFormat={this.nameFormatter}>
-              Problem
-            </TableHeaderColumn>
-            {visibility.solvedCount && (
-              <TableHeaderColumn
-                dataField="solved_count"
-                dataSort={true}
-                width="10%"
-                dataFromat={this.solvedCountFormatter}
-              >
-                Solved
-              </TableHeaderColumn>
+          <Paper>
+            {coloredProblems.length > 0 && (
+              <MUIDataTable
+                title="Problem List"
+                data={coloredProblems}
+                columns={columns}
+                options={options}
+              />
             )}
-            {visibility.tags && (
-              <TableHeaderColumn
-                dataField="tags"
-                dataFormat={this.tagsFormatter}
-              >
-                Tags
-              </TableHeaderColumn>
-            )}
-          </BootstrapTable>
+          </Paper>
         </Grid>
       </Grid>
     );

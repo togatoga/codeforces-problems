@@ -17,11 +17,13 @@
     "bootstrap": "^4.2.1",
     "cross-fetch": "^3.0.0",
     "js-yaml": "^3.12.2",
+    "mui-datatables": "^2.0.0-beta.58",
     "react": "^16.7.0",
     "react-bootstrap-table": "^4.3.1",
     "react-dom": "^16.7.0",
     "react-icons": "^3.4.0",
     "react-redux": "^6.0.0",
+    "react-virtualized": "^9.21.0",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "reselect": "^4.0.0"
